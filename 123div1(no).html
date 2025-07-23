@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>세 자리 수 ÷ 한 자리 수, 신나는 나누기 연습!</title>
+    <style>
+        /* 구글 폰트 추가 (귀여운 느낌) */
+        @import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap');
+
+        body {
+            font-family: 'Do Hyeon', sans-serif;
+            background-color: #f0f8ff; /* 하늘색 배경 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none; /* 텍스트 드래그 방지 */
+        }
+
+        #container {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #005a9c;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        #problem-area {
+            background-color: #e6f7ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 2px dashed #0077cc;
+        }
+
+        #problem {
+            font-size: 4em;
+            font-weight: bold;
+            color: #003366;
+            letter-spacing: 5px;
+        }
+
+        #input-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-group label {
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .input-group input {
+            font-family: 'Do Hyeon', sans-serif;
+            width: 80px;
+            padding: 10px;
+            font-size: 1.8em;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            /* input number 화살표 숨기기 */
+            -moz-appearance: textfield;
+        }
+        .input-group input::-webkit-outer-spin-button,
+        .input-group input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #button-area {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            font-family: 'Do Hyeon', sans-serif;
+            padding: 12px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+
+        #check-btn { background-color: #007bff; }
+        #new-problem-btn { background-color: #28a745; }
+        #hint-btn { background-color: #ffc107; color: #333; }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .correct { color: #28a745; }
+        .incorrect { color: #dc3545; }
+        .hint { color: #e88f00; font-size: 1.2em; }
+
+        #scoreboard {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.2em;
+        }
+        
+        #scoreboard span {
+            font-weight: bold;
+        }
+        
+        #correct-count { color: #007bff; }
+        #incorrect-count { color: #dc3545; }
+        #streak-count { color: #ff9800; }
+        
+        /* 모바일 화면 대응 */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            #problem { font-size: 3em; }
+            .input-group label { font-size: 1.2em; }
+            .input-group input { width: 60px; font-size: 1.5em; }
+            #input-area { flex-direction: column; gap: 15px; }
+            button { padding: 10px 20px; font-size: 1em; }
+            #feedback { font-size: 1.2em; }
+            #scoreboard { font-size: 1em; flex-direction: column; gap: 10px; align-items: center;}
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <h1>
+            <span>&#x1F9EE;</span>
+            세 자리 수 ÷ 한 자리 수, 신나는 나누기 연습!
+            <span>&#x1F4D0;</span>
+        </h1>
+        <p>문제의 몫과 나머지를 계산하고 '채점하기' 버튼을 눌러보세요!</p>
+        
+        <div id="problem-area">
+            <div id="problem">
+                <span id="dividend"></span> ÷ <span id="divisor"></span>
+            </div>
+        </div>
+
+        <div id="input-area">
+            <div class="input-group">
+                <label for="quotient-input">몫:</label>
+                <input type="number" id="quotient-input" min="0">
+            </div>
+            <div class="input-group">
+                <label for="remainder-input">나머지:</label>
+                <input type="number" id="remainder-input" min="0">
+            </div>
+        </div>
+        
+        <div id="button-area">
+            <button id="check-btn">채점하기 ✍️</button>
+            <button id="new-problem-btn">새로운 문제 ✨</button>
+            <button id="hint-btn">힌트 💡</button>
+        </div>
+
+        <div id="feedback"></div>
+
+        <div id="scoreboard">
+            <div>맞은 개수: <span id="correct-count">0</span></div>
+            <div>틀린 개수: <span id="incorrect-count">0</span></div>
+            <div>🔥 연속 정답: <span id="streak-count">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 요소 가져오기
+        const dividendEl = document.getElementById('dividend');
+        const divisorEl = document.getElementById('divisor');
+        const quotientInput = document.getElementById('quotient-input');
+        const remainderInput = document.getElementById('remainder-input');
+        const checkBtn = document.getElementById('check-btn');
+        const newProblemBtn = document.getElementById('new-problem-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const feedbackEl = document.getElementById('feedback');
+        const correctCountEl = document.getElementById('correct-count');
+        const incorrectCountEl = document.getElementById('incorrect-count');
+        const streakCountEl = document.getElementById('streak-count');
+
+        // 상태 변수 (현재 문제의 정보와 점수 저장)
+        let currentDividend, currentDivisor, correctQuotient, correctRemainder;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let streakCount = 0;
+
+        // 소리 효과를 위한 오디오 컨텍스트
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // 소리 재생 함수
+        function playSound(type) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.01);
+
+            if (type === 'correct') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+            } else { // incorrect
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+            }
+
+            oscillator.start(audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2);
+            oscillator.stop(audioCtx.currentTime + 0.2);
+        }
+
+        // 새로운 문제 생성 함수
+        function generateProblem() {
+            // 나누는 수는 2부터 9까지
+            currentDivisor = Math.floor(Math.random() * 8) + 2;
+            
+            // 나누어지는 수는 100부터 999까지
+            currentDividend = Math.floor(Math.random() * 900) + 100;
+
+            // 정답 계산
+            correctQuotient = Math.floor(currentDividend / currentDivisor);
+            correctRemainder = currentDividend % currentDivisor;
+
+            // 화면에 문제 표시
+            dividendEl.textContent = currentDividend;
+            divisorEl.textContent = currentDivisor;
+
+            // 입력 칸 초기화
+            quotientInput.value = '';
+            remainderInput.value = '';
+            feedbackEl.innerHTML = ''; // 피드백 메시지 초기화
+            feedbackEl.className = ''; // 피드백 스타일 초기화
+            
+            // 몫 입력칸에 포커스
+            quotientInput.focus();
+        }
+
+        // 채점 함수
+        function checkAnswer() {
+            const userQuotient = parseInt(quotientInput.value, 10);
+            const userRemainder = parseInt(remainderInput.value, 10) || 0; // 나머지를 입력 안하면 0으로 처리
+
+            if (isNaN(userQuotient)) {
+                feedbackEl.textContent = '앗! 몫을 입력해주세요. 🤔';
+                feedbackEl.className = 'incorrect';
+                return;
+            }
+
+            if (userQuotient === correctQuotient && userRemainder === correctRemainder) {
+                // 정답일 경우
+                feedbackEl.innerHTML = '딩동댕! 🎉 정답입니다! 참 잘했어요!';
+                feedbackEl.className = 'correct';
+                playSound('correct');
+
+                correctCount++;
+                streakCount++;
+                
+                // 1.5초 후에 자동으로 새로운 문제 출제
+                setTimeout(generateProblem, 1500);
+
+            } else {
+                // 오답일 경우
+                feedbackEl.innerHTML = `아쉬워요. 정답은 <strong>몫: ${correctQuotient}, 나머지: ${correctRemainder}</strong> 였어요. 다시 도전! 💪`;
+                feedbackEl.className = 'incorrect';
+                playSound('incorrect');
+
+                incorrectCount++;
+                streakCount = 0; // 연속 정답 초기화
+            }
+            updateScoreboard();
+        }
+        
+        // 힌트 제공 함수
+        function showHint() {
+            feedbackEl.className = 'hint';
+            
+            const firstDigit = Math.floor(currentDividend / 100);
+            if (firstDigit >= currentDivisor) {
+                 feedbackEl.textContent = `힌트: ${currentDividend}의 첫 자리 수 ${firstDigit} 안에 ${currentDivisor}가 몇 번 들어갈까요?`;
+            } else {
+                 const firstTwoDigits = Math.floor(currentDividend / 10);
+                 feedbackEl.textContent = `힌트: ${currentDividend}의 앞 두 자리 수 ${firstTwoDigits} 안에 ${currentDivisor}가 몇 번 들어갈까요?`;
+            }
+        }
+
+        // 점수판 업데이트 함수
+        function updateScoreboard() {
+            correctCountEl.textContent = correctCount;
+            incorrectCountEl.textContent = incorrectCount;
+            streakCountEl.textContent = streakCount;
+        }
+
+        // 이벤트 리스너 연결
+        checkBtn.addEventListener('click', checkAnswer);
+        newProblemBtn.addEventListener('click', generateProblem);
+        hintBtn.addEventListener('click', showHint);
+
+        // Enter 키를 누르면 채점되도록 설정
+        quotientInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                remainderInput.focus(); // 몫 입력 후 엔터 누르면 나머지 칸으로 이동
+            }
+        });
+        remainderInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // 페이지 로드 시 첫 문제 생성
+        generateProblem();
+    </script>
+</body>
+</html>

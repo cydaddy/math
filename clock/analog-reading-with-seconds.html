@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아날로그 시계 읽기 연습 (초침 포함)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poor+Story&display=swap');
+
+        :root {
+            --bg-color: #e0f7fa;
+            --clock-bg: #ffffff;
+            --clock-border: #00acc1;
+            --hand-hour: #00796b;
+            --hand-minute: #0288d1;
+            --hand-second: #d32f2f;
+            --digital-bg: #f0f9ff;
+            --digital-text: #01579b;
+            --button-bg: #80deea;
+            --button-hover: #4dd0e1;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --tick-color: #bdc3c7;
+            --tick-five-color: #7f8c8d;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+        }
+
+        body {
+            font-family: 'Poor Story', cursive;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            user-select: none;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            min-width: 800px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--clock-border);
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        .clock-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 50px;
+            justify-content: center;
+        }
+
+        .analog-clock {
+            width: 400px;
+            height: 400px;
+            min-width: 400px;
+            min-height: 400px;
+            background-color: var(--clock-bg);
+            border: 10px solid var(--clock-border);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 5px 15px var(--shadow-color) inset;
+            flex-shrink: 0;
+        }
+
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .clock-face::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: var(--hand-hour);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+
+        .tick-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tick {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 10px;
+            background-color: var(--tick-color);
+        }
+
+        .tick.five-min {
+            width: 4px;
+            height: 20px;
+            background-color: var(--tick-five-color);
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 10px;
+            transform: translateX(-50%);
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 100px;
+            background-color: var(--hand-hour);
+            z-index: 10;
+        }
+
+        .minute-hand {
+            width: 6px;
+            height: 140px;
+            background-color: var(--hand-minute);
+            z-index: 20;
+        }
+
+        .second-hand {
+            width: 3px;
+            height: 160px;
+            background-color: var(--hand-second);
+            z-index: 30;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: var(--clock-border);
+            z-index: 5;
+        }
+
+        .answer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: var(--digital-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px var(--shadow-color) inset;
+            min-width: 300px;
+            flex-shrink: 0;
+        }
+
+        .answer-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .time-segment {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .time-segment input {
+            width: 80px;
+            height: 70px;
+            font-family: 'Poor Story', cursive;
+            font-size: 3em;
+            text-align: center;
+            border: 3px solid var(--clock-border);
+            border-radius: 10px;
+            background-color: #fff;
+            color: var(--digital-text);
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        
+        .time-segment input::-webkit-outer-spin-button,
+        .time-segment input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .time-unit-label {
+            font-size: 2em;
+            color: var(--digital-text);
+            margin: 0 8px;
+            padding-top: 35px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Poor Story', cursive;
+            font-size: 1.3em;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--button-hover);
+        }
+
+        .btn-success {
+            background-color: var(--correct-color);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background-color: var(--incorrect-color);
+            color: #fff;
+        }
+
+        .result-message {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .correct {
+            background-color: #e8f5e8;
+            color: var(--correct-color);
+        }
+
+        .incorrect {
+            background-color: #ffeaea;
+            color: var(--incorrect-color);
+        }
+
+        .score-display {
+            font-size: 1.3em;
+            color: var(--digital-text);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>아날로그 시계 읽기 연습</h1>
+        
+        <div class="clock-wrapper">
+            <div class="analog-clock">
+                <div class="clock-face" id="clock-face">
+                    <div class="hand hour-hand" id="hour-hand"></div>
+                    <div class="hand minute-hand" id="minute-hand"></div>
+                    <div class="hand second-hand" id="second-hand"></div>
+                </div>
+            </div>
+
+            <div class="answer-section">
+                <div class="answer-display">
+                    <div class="time-segment">
+                        <input type="number" id="hour-input" min="1" max="12" placeholder="시">
+                    </div>
+                    <div class="time-unit-label">시</div>
+                    <div class="time-segment">
+                        <input type="number" id="minute-input" min="0" max="59" placeholder="분">
+                    </div>
+                    <div class="time-unit-label">분</div>
+                    <div class="time-segment">
+                        <input type="number" id="second-input" min="0" max="59" placeholder="초">
+                    </div>
+                    <div class="time-unit-label">초</div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="check-btn">정답 확인</button>
+                    <button class="btn btn-primary" id="new-problem-btn">새 문제</button>
+                </div>
+                
+                <div class="score-display">
+                    맞춘 문제: <span id="correct-count">0</span> / 총 문제: <span id="total-count">0</span>
+                </div>
+                
+                <div class="result-message" id="result-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hourHand = document.getElementById('hour-hand');
+            const minuteHand = document.getElementById('minute-hand');
+            const secondHand = document.getElementById('second-hand');
+            const clockFace = document.getElementById('clock-face');
+
+            const hourInput = document.getElementById('hour-input');
+            const minuteInput = document.getElementById('minute-input');
+            const secondInput = document.getElementById('second-input');
+            
+            const checkBtn = document.getElementById('check-btn');
+            const newProblemBtn = document.getElementById('new-problem-btn');
+            const resultMessage = document.getElementById('result-message');
+            const correctCountEl = document.getElementById('correct-count');
+            const totalCountEl = document.getElementById('total-count');
+
+            let currentTime = { h: 0, m: 0, s: 0 };
+            let correctCount = 0;
+            let totalCount = 0;
+
+            function generateRandomTime() {
+                currentTime.h = Math.floor(Math.random() * 12) + 1;
+                currentTime.m = Math.floor(Math.random() * 60);
+                currentTime.s = Math.floor(Math.random() * 60);
+                updateAnalogClock();
+                clearInputs();
+                hideResult();
+            }
+
+            function updateAnalogClock() {
+                const h = currentTime.h % 12;
+                const m = currentTime.m;
+                const s = currentTime.s;
+
+                const hourDeg = (h + m / 60) * 30;
+                const minuteDeg = m * 6;
+                const secondDeg = s * 6;
+
+                hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+                minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+                secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+            }
+
+            function clearInputs() {
+                hourInput.value = '';
+                minuteInput.value = '';
+                secondInput.value = '';
+            }
+
+            function hideResult() {
+                resultMessage.style.display = 'none';
+                resultMessage.className = 'result-message';
+            }
+
+            function showResult(isCorrect, userAnswer, correctAnswer) {
+                resultMessage.style.display = 'block';
+                if (isCorrect) {
+                    resultMessage.className = 'result-message correct';
+                    resultMessage.textContent = '정답입니다! 🎉';
+                } else {
+                    resultMessage.className = 'result-message incorrect';
+                    resultMessage.textContent = `틀렸습니다. 정답: ${correctAnswer}`;
+                }
+            }
+
+            function checkAnswer() {
+                const userHour = parseInt(hourInput.value) || 0;
+                const userMinute = parseInt(minuteInput.value) || 0;
+                const userSecond = parseInt(secondInput.value) || 0;
+
+                const isCorrect = userHour === currentTime.h && 
+                                userMinute === currentTime.m && 
+                                userSecond === currentTime.s;
+
+                totalCount++;
+                if (isCorrect) {
+                    correctCount++;
+                }
+
+                const userAnswer = `${userHour}시 ${userMinute}분 ${userSecond}초`;
+                const correctAnswer = `${currentTime.h}시 ${currentTime.m}분 ${currentTime.s}초`;
+
+                showResult(isCorrect, userAnswer, correctAnswer);
+                updateScore();
+            }
+
+            function updateScore() {
+                correctCountEl.textContent = correctCount;
+                totalCountEl.textContent = totalCount;
+            }
+
+            function createClockNumbers() {
+                const radius = clockFace.offsetWidth / 2 - 35;
+                for (let i = 1; i <= 12; i++) {
+                    const angle = (i - 3) * (Math.PI / 6);
+                    const x = radius * Math.cos(angle) + (clockFace.offsetWidth / 2);
+                    const y = radius * Math.sin(angle) + (clockFace.offsetHeight / 2);
+                    
+                    const numberDiv = document.createElement('div');
+                    numberDiv.className = 'number';
+                    numberDiv.textContent = i;
+                    numberDiv.style.left = `${x}px`;
+                    numberDiv.style.top = `${y}px`;
+                    numberDiv.style.transform = `translate(-50%, -50%)`;
+                    clockFace.appendChild(numberDiv);
+                }
+            }
+
+            function createTickMarks() {
+                for (let i = 0; i < 60; i++) {
+                    const rotationContainer = document.createElement('div');
+                    rotationContainer.className = 'tick-container';
+                    rotationContainer.style.transform = `rotate(${i * 6 - 90}deg)`;
+
+                    const tick = document.createElement('div');
+                    tick.className = 'tick';
+                    if (i % 5 === 0) {
+                        tick.classList.add('five-min');
+                    }
+                    rotationContainer.appendChild(tick);
+                    clockFace.appendChild(rotationContainer);
+                }
+            }
+
+            // 이벤트 리스너
+            checkBtn.addEventListener('click', checkAnswer);
+            newProblemBtn.addEventListener('click', generateRandomTime);
+
+            // Enter 키로 정답 확인
+            [hourInput, minuteInput, secondInput].forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        checkAnswer();
+                    }
+                });
+            });
+
+            // 초기화
+            createClockNumbers();
+            createTickMarks();
+            generateRandomTime();
+        });
+    </script>
+</body>
+</html>

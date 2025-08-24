@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디지털 시계를 아날로그로 표시하기 연습 (초침 없음)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poor+Story&display=swap');
+
+        :root {
+            --bg-color: #e0f7fa;
+            --clock-bg: #ffffff;
+            --clock-border: #00acc1;
+            --hand-hour: #00796b;
+            --hand-minute: #0288d1;
+            --hand-second: #d32f2f;
+            --digital-bg: #f0f9ff;
+            --digital-text: #01579b;
+            --button-bg: #80deea;
+            --button-hover: #4dd0e1;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --tick-color: #bdc3c7;
+            --tick-five-color: #7f8c8d;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+        }
+
+        body {
+            font-family: 'Poor Story', cursive;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            user-select: none;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            text-align: center;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--clock-border);
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+
+        .clock-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 50px;
+            justify-content: center;
+        }
+
+        .digital-time-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: var(--digital-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 5px var(--shadow-color) inset;
+            min-width: 280px;
+        }
+
+        .digital-display {
+            font-size: 3em;
+            color: var(--digital-text);
+            font-weight: bold;
+            background-color: #000;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .analog-clock {
+            width: 400px;
+            height: 400px;
+            background-color: var(--clock-bg);
+            border: 10px solid var(--clock-border);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 5px 15px var(--shadow-color) inset;
+        }
+
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .clock-face::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: var(--hand-hour);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+
+        .tick-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tick {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 10px;
+            background-color: var(--tick-color);
+        }
+
+        .tick.five-min {
+            width: 4px;
+            height: 20px;
+            background-color: var(--tick-five-color);
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 10px;
+            cursor: grab;
+            transform: translateX(-50%);
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 100px;
+            background-color: var(--hand-hour);
+            z-index: 10;
+        }
+
+        .minute-hand {
+            width: 6px;
+            height: 140px;
+            background-color: var(--hand-minute);
+            z-index: 20;
+        }
+
+        .second-hand {
+            display: none !important;
+        }
+
+        .hand:active {
+            cursor: grabbing;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: var(--clock-border);
+            z-index: 5;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Poor Story', cursive;
+            font-size: 1.3em;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--button-hover);
+        }
+
+        .btn-success {
+            background-color: var(--correct-color);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background-color: var(--incorrect-color);
+            color: #fff;
+        }
+
+        .result-message {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .correct {
+            background-color: #e8f5e8;
+            color: var(--correct-color);
+        }
+
+        .incorrect {
+            background-color: #ffeaea;
+            color: var(--incorrect-color);
+        }
+
+        .score-display {
+            font-size: 1.3em;
+            color: var(--digital-text);
+            margin-top: 10px;
+        }
+
+        .instruction {
+            font-size: 1.2em;
+            color: var(--digital-text);
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>디지털 시계를 아날로그로 표시하기 연습</h1>
+        
+        <div class="clock-wrapper">
+            <div class="digital-time-section">
+                <div class="instruction">
+                    아래 디지털 시간을<br>
+                    아날로그 시계로 표시하세요
+                </div>
+                <div class="digital-display" id="digital-display">12:00</div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="check-btn">정답 확인</button>
+                    <button class="btn btn-primary" id="new-problem-btn">새 문제</button>
+                </div>
+                
+                <div class="score-display">
+                    맞춘 문제: <span id="correct-count">0</span> / 총 문제: <span id="total-count">0</span>
+                </div>
+                
+                <div class="result-message" id="result-message" style="display: none;"></div>
+            </div>
+
+            <div class="analog-clock">
+                <div class="clock-face" id="clock-face">
+                    <div class="hand hour-hand" id="hour-hand"></div>
+                    <div class="hand minute-hand" id="minute-hand"></div>
+                    <div class="hand second-hand" id="second-hand"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hourHand = document.getElementById('hour-hand');
+            const minuteHand = document.getElementById('minute-hand');
+            const secondHand = document.getElementById('second-hand');
+            const clockFace = document.getElementById('clock-face');
+            const digitalDisplay = document.getElementById('digital-display');
+            
+            const checkBtn = document.getElementById('check-btn');
+            const newProblemBtn = document.getElementById('new-problem-btn');
+            const resultMessage = document.getElementById('result-message');
+            const correctCountEl = document.getElementById('correct-count');
+            const totalCountEl = document.getElementById('total-count');
+
+            let targetTime = { h: 0, m: 0, s: 0 };
+            let userTime = { h: 0, m: 0, s: 0 };
+            let correctCount = 0;
+            let totalCount = 0;
+            let draggedHand = null;
+
+            function generateRandomTime() {
+                targetTime.h = Math.floor(Math.random() * 12) + 1;
+                targetTime.m = Math.floor(Math.random() * 60);
+                targetTime.s = 0;
+                
+                updateDigitalDisplay();
+                resetAnalogClock();
+                hideResult();
+            }
+
+            function updateDigitalDisplay() {
+                const h = String(targetTime.h).padStart(2, '0');
+                const m = String(targetTime.m).padStart(2, '0');
+                digitalDisplay.textContent = `${h}:${m}`;
+            }
+
+            function resetAnalogClock() {
+                userTime = { h: 12, m: 0, s: 0 };
+                updateAnalogClock();
+            }
+
+            function updateAnalogClock() {
+                const h = userTime.h % 12;
+                const m = userTime.m;
+                const s = userTime.s;
+
+                const hourDeg = (h + m / 60) * 30;
+                const minuteDeg = m * 6;
+                const secondDeg = s * 6;
+
+                hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+                minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+                secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+            }
+
+            function hideResult() {
+                resultMessage.style.display = 'none';
+                resultMessage.className = 'result-message';
+            }
+
+            function showResult(isCorrect) {
+                resultMessage.style.display = 'block';
+                if (isCorrect) {
+                    resultMessage.className = 'result-message correct';
+                    resultMessage.textContent = '정답입니다! 🎉';
+                } else {
+                    resultMessage.className = 'result-message incorrect';
+                    resultMessage.textContent = `틀렸습니다. 다시 시도해보세요!`;
+                }
+            }
+
+            function checkAnswer() {
+                const tolerance = 3; // 3도 오차 허용 (분침 없어서 조금 더 관대하게)
+                
+                const targetHourDeg = (targetTime.h % 12 + targetTime.m / 60) * 30;
+                const targetMinuteDeg = targetTime.m * 6;
+                
+                const userHourDeg = (userTime.h % 12 + userTime.m / 60) * 30;
+                const userMinuteDeg = userTime.m * 6;
+
+                const hourDiff = Math.abs(targetHourDeg - userHourDeg);
+                const minuteDiff = Math.abs(targetMinuteDeg - userMinuteDeg);
+
+                const isCorrect = hourDiff <= tolerance && minuteDiff <= tolerance;
+
+                totalCount++;
+                if (isCorrect) {
+                    correctCount++;
+                }
+
+                showResult(isCorrect);
+                updateScore();
+            }
+
+            function updateScore() {
+                correctCountEl.textContent = correctCount;
+                totalCountEl.textContent = totalCount;
+            }
+
+            // 드래그 기능
+            function startDrag(e, hand) {
+                e.preventDefault();
+                draggedHand = hand;
+                document.body.style.cursor = 'grabbing';
+            }
+
+            hourHand.addEventListener('mousedown', (e) => startDrag(e, 'hour'));
+            minuteHand.addEventListener('mousedown', (e) => startDrag(e, 'minute'));
+
+            document.addEventListener('mousemove', (e) => {
+                if (!draggedHand) return;
+
+                const rect = clockFace.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const dx = e.clientX - centerX;
+                const dy = e.clientY - centerY;
+                
+                const angleRad = Math.atan2(dy, dx);
+                let angleDeg = angleRad * 180 / Math.PI + 90;
+                if (angleDeg < 0) angleDeg += 360;
+
+                if (draggedHand === 'hour') {
+                    let hourValue = Math.round(angleDeg / 30);
+                    if (hourValue === 0) hourValue = 12;
+                    userTime.h = hourValue;
+
+                } else if (draggedHand === 'minute') {
+                    const oldM = userTime.m;
+                    const newM = Math.round(angleDeg / 6) % 60;
+                    userTime.m = newM;
+
+                    if (oldM > 45 && newM < 15) {
+                        userTime.h = (userTime.h % 12) + 1;
+                    } else if (oldM < 15 && newM > 45) {
+                        userTime.h = (userTime.h === 1) ? 12 : userTime.h - 1;
+                    }
+                }
+                updateAnalogClock();
+            });
+
+            document.addEventListener('mouseup', () => {
+                draggedHand = null;
+                document.body.style.cursor = 'default';
+            });
+
+            function createClockNumbers() {
+                const radius = clockFace.offsetWidth / 2 - 35;
+                for (let i = 1; i <= 12; i++) {
+                    const angle = (i - 3) * (Math.PI / 6);
+                    const x = radius * Math.cos(angle) + (clockFace.offsetWidth / 2);
+                    const y = radius * Math.sin(angle) + (clockFace.offsetHeight / 2);
+                    
+                    const numberDiv = document.createElement('div');
+                    numberDiv.className = 'number';
+                    numberDiv.textContent = i;
+                    numberDiv.style.left = `${x}px`;
+                    numberDiv.style.top = `${y}px`;
+                    numberDiv.style.transform = `translate(-50%, -50%)`;
+                    clockFace.appendChild(numberDiv);
+                }
+            }
+
+            function createTickMarks() {
+                for (let i = 0; i < 60; i++) {
+                    const rotationContainer = document.createElement('div');
+                    rotationContainer.className = 'tick-container';
+                    rotationContainer.style.transform = `rotate(${i * 6 - 90}deg)`;
+
+                    const tick = document.createElement('div');
+                    tick.className = 'tick';
+                    if (i % 5 === 0) {
+                        tick.classList.add('five-min');
+                    }
+                    rotationContainer.appendChild(tick);
+                    clockFace.appendChild(rotationContainer);
+                }
+            }
+
+            // 이벤트 리스너
+            checkBtn.addEventListener('click', checkAnswer);
+            newProblemBtn.addEventListener('click', generateRandomTime);
+
+            // 초기화
+            createClockNumbers();
+            createTickMarks();
+            generateRandomTime();
+        });
+    </script>
+</body>
+</html>

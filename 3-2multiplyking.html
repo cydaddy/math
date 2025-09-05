@@ -6,7 +6,7 @@
     <title>초등 3학년 2학기 곱셈 연산왕</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 공책 느낌의 그리드 배경 */
+        /* --- 기본 모드 (연습 모드) 스타일 --- */
         body {
             background-color: #f0f9ff; /* bg-sky-50 */
             background-image:
@@ -14,70 +14,74 @@
                 linear-gradient(to right, rgba(17, 94, 89, 0.1) 1px, transparent 1px);
             background-size: 20px 20px;
             background-attachment: fixed;
+            transition: background-color 0.5s ease;
         }
 
-        /* 숫자 입력창 위아래 화살표(스피너) 제거 */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* --- [추가] 도전 모드 네온 테마 스타일 --- */
+        body.challenge-mode-active {
+            background-color: #1a1a2e;
+            background-image:
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+        }
+        .challenge-mode-active h1 {
+            color: #f0f;
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #f0f, 0 0 30px #f0f, 0 0 40px #f0f;
+        }
+        .challenge-mode-active p { color: #e0e0e0; }
+        .challenge-mode-active #quiz-area, .challenge-mode-active #final-celebration div {
+            background-color: rgba(26, 26, 46, 0.8);
+            border: 2px solid #0ff;
+            box-shadow: 0 0 15px #0ff;
+        }
+        .challenge-mode-active #stage-title {
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+        }
+        .challenge-mode-active #problem-display span {
+            color: #fff;
+            text-shadow: 0 0 8px #fff;
+        }
+        .challenge-mode-active #answer-input {
+            background-color: #16213e;
+            color: #50fa7b;
+            border-color: #50fa7b;
+            box-shadow: 0 0 10px #50fa7b;
+        }
+        .challenge-mode-active #submit-btn {
+            background-color: #ff5555;
+            box-shadow: 0 0 15px #ff5555;
+        }
+        /* 도전 모드 버튼 스타일 재정의 */
+        .challenge-mode-active .btn-success { background-color: #28a745; box-shadow: 0 0 10px #28a745; }
+        .challenge-mode-active .btn-challenge { background-color: #007bff; box-shadow: 0 0 10px #007bff; }
+        .challenge-mode-active .btn-locked { background-color: #6c757d; box-shadow: none; }
+        
+        /* [추가] 타이틀 텍스트 선택(블록 지정) 방지 */
+        #main-title {
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10+ and Edge */
+            user-select: none; /* Standard syntax */
+        }
+
+        /* 숫자 입력창 스피너 제거 */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         /* 애니메이션 효과 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes popIn {
-            0% { transform: scale(0.5) rotate(-15deg); opacity: 0; }
-            80% { transform: scale(1.1) rotate(5deg); opacity: 1; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0.5) rotate(-15deg); opacity: 0; } 80% { transform: scale(1.1) rotate(5deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         .pop-in { animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; }
         .shake { animation: shake 0.3s ease-in-out forwards; }
         
         /* 축하 폭죽 애니메이션 */
-        #fireworks-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 9999;
-        }
-        .firework {
-            position: absolute;
-            bottom: 0;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background-color: #fff;
-            animation: shoot 2s ease-out forwards;
-        }
-        @keyframes shoot {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-90vh); opacity: 0; }
-        }
-        .firework::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 100%;
-            width: 80px;
-            height: 80px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            opacity: 0;
-            animation: explode 1s ease-out forwards;
-            animation-delay: 2s;
-        }
-        @keyframes explode {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-        }
+        #fireworks-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+        .firework { position: absolute; bottom: 0; width: 4px; height: 4px; border-radius: 50%; background-color: #fff; animation: shoot 2s ease-out forwards; }
+        @keyframes shoot { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-90vh); opacity: 0; } }
+        .firework::before { content: ''; position: absolute; left: 50%; top: 100%; width: 80px; height: 80px; transform: translate(-50%, -50%); border-radius: 50%; opacity: 0; animation: explode 1s ease-out forwards; animation-delay: 2s; }
+        @keyframes explode { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
         .firework:nth-child(5n+1)::before { box-shadow: 0 0 15px 5px #ff4757, 0 0 25px 15px #ff6b81; }
         .firework:nth-child(5n+2)::before { box-shadow: 0 0 15px 5px #5352ed, 0 0 25px 15px #5352ed; }
         .firework:nth-child(5n+3)::before { box-shadow: 0 0 15px 5px #2ed573, 0 0 25px 15px #2ed573; }
@@ -90,35 +94,25 @@
 
         <!-- 타이틀 -->
         <header class="mb-8 relative">
-            <h1 id="main-title" class="text-3xl sm:text-4xl md:text-5xl font-bold text-teal-700 whitespace-nowrap cursor-pointer" title="비밀 기능 활성화...">🎉 초등 3학년 2학기 곱셈 연산왕 🎉</h1>
-            <p class="text-gray-600 mt-2">차근차근 단계를 완료하고 곱셈의 왕이 되어보세요!</p>
-            <div id="teacher-mode-indicator" class="hidden absolute top-0 -right-4 bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">연습 모드 ON</div>
+            <h1 id="main-title" class="text-3xl sm:text-4xl md:text-5xl font-bold text-teal-700 whitespace-nowrap cursor-pointer transition-all duration-500" title="비밀 기능 활성화...">🎉 초등 3학년 2학기 곱셈 연산왕 🎉</h1>
+            <div id="challenge-mode-indicator" class="hidden absolute top-0 -right-4 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">도전 모드 ON</div>
             <button id="reset-btn" class="absolute top-0 -left-4 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-md transition transform hover:scale-105">처음부터 하기</button>
         </header>
 
-        <!-- 단계 선택: Flexbox를 사용하여 가운데 정렬 -->
-        <section id="stage-selection" class="flex flex-wrap justify-center gap-4 mb-8">
-            <!-- 자바스크립트로 단계 버튼 생성 -->
-        </section>
+        <section id="stage-selection" class="flex flex-wrap justify-center gap-4 mb-8"></section>
 
-        <!-- 문제 풀이 영역 -->
-        <main id="quiz-area" class="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-2xl mx-auto" style="display: none;">
-            <h2 id="stage-title" class="text-xl sm:text-2xl font-bold text-blue-600 mb-2"></h2>
-            <p id="progress-text" class="text-gray-500 mb-6">문제 1 / 5</p>
-            
+        <main id="quiz-area" class="bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-2xl mx-auto transition-all duration-500" style="display: none;">
+            <h2 id="stage-title" class="text-xl sm:text-2xl font-bold text-blue-600 mb-2 transition-colors duration-500"></h2>
+            <p id="progress-text" class="text-gray-500 mb-6"></p>
             <div id="problem-display" class="text-6xl font-mono font-bold text-gray-800 my-8 flex justify-center items-center space-x-4">
                 <span id="num1"></span><span>×</span><span id="num2"></span>
             </div>
-
-            <input type="number" id="answer-input" class="w-full max-w-xs mx-auto text-3xl p-3 border-4 border-yellow-400 rounded-lg text-center focus:outline-none focus:ring-4 focus:ring-yellow-300 transition" placeholder="정답은?">
-            
-            <button id="submit-btn" class="mt-6 w-full max-w-xs mx-auto bg-green-500 hover:bg-green-600 text-white font-bold text-2xl py-3 px-6 rounded-lg shadow-md transform hover:scale-105 transition">확인</button>
-            
+            <input type="number" id="answer-input" class="w-full max-w-xs mx-auto text-3xl p-3 border-4 border-yellow-400 rounded-lg text-center focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all duration-500" placeholder="정답은?">
+            <button id="submit-btn" class="mt-6 w-full max-w-xs mx-auto bg-green-500 hover:bg-green-600 text-white font-bold text-2xl py-3 px-6 rounded-lg shadow-md transform hover:scale-105 transition-all duration-500">확인</button>
             <div id="feedback" class="mt-4 text-xl sm:text-2xl font-bold h-8"></div>
             <button id="back-btn" class="hidden mt-4 text-gray-600 hover:text-gray-800 underline">단계 선택으로 돌아가기</button>
         </main>
 
-        <!-- 최종 축하 화면 -->
         <div id="final-celebration" class="hidden">
             <div id="fireworks-container"></div>
             <div class="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-2xl pop-in">
@@ -132,7 +126,7 @@
 
     <script>
         const STORAGE_KEY = 'multiplyKingProgress';
-        const appState = { currentStage: -1, unlockedStage: 0, currentProblemIndex: 0, problemsPerStage: 5, currentAnswer: 0, isPracticeMode: false };
+        const appState = { currentStage: -1, unlockedStage: 0, currentProblemIndex: 0, problemsPerStage: 5, currentAnswer: 0, isChallengeMode: false };
         const stages = [
             { name: "1단계: 올림 없는 (세 자리 수) × (한 자리 수)", generator: generateNoCarry3x1 },
             { name: "2단계: 올림 한 번 있는 (세 자리 수) × (한 자리 수)", generator: generateOneCarry3x1 },
@@ -143,6 +137,7 @@
             { name: "7단계: 올림 여러 번 있는 (두 자리 수) × (두 자리 수)", generator: generateMultiCarry2x2 },
         ];
 
+        const bodyEl = document.body;
         const stageSelectionEl = document.getElementById('stage-selection');
         const quizAreaEl = document.getElementById('quiz-area');
         const stageTitleEl = document.getElementById('stage-title');
@@ -155,7 +150,7 @@
         const finalCelebrationEl = document.getElementById('final-celebration');
         const fireworksContainerEl = document.getElementById('fireworks-container');
         const mainTitleEl = document.getElementById('main-title');
-        const teacherModeIndicatorEl = document.getElementById('teacher-mode-indicator');
+        const challengeModeIndicatorEl = document.getElementById('challenge-mode-indicator');
         const resetBtnEl = document.getElementById('reset-btn');
         const backBtnEl = document.getElementById('back-btn');
 
@@ -177,19 +172,16 @@
                 button.dataset.stage = index;
                 button.className = "p-4 rounded-lg font-bold text-white transition transform hover:scale-105 shadow-md flex flex-col items-center justify-center h-32 w-40";
                 
-                const statusSpan = document.createElement('span');
-                statusSpan.className = "text-xl mb-1";
-                const textSpan = document.createElement('span');
-                textSpan.className = "text-sm"; textSpan.textContent = stage.name;
+                const statusSpan = document.createElement('span'); statusSpan.className = "text-xl mb-1";
+                const textSpan = document.createElement('span'); textSpan.className = "text-sm"; textSpan.textContent = stage.name;
                 
-                if (appState.isPracticeMode) {
-                    button.classList.add('bg-purple-500'); statusSpan.textContent = '🔁 연습하기'; button.onclick = () => startStage(index);
+                if (appState.isChallengeMode) {
+                    if (index < appState.unlockedStage) { button.classList.add('bg-green-500', 'btn-success'); statusSpan.textContent = '✅ 성공!'; button.onclick = () => startStage(index); }
+                    else if (index === appState.unlockedStage) { button.classList.add('bg-blue-500', 'btn-challenge', 'animate-pulse'); statusSpan.textContent = '▶️ 도전!'; button.onclick = () => startStage(index); }
+                    else { button.classList.add('bg-gray-400', 'btn-locked', 'cursor-not-allowed'); statusSpan.textContent = '🔒 잠김'; }
                 } else {
-                    if (index < appState.unlockedStage) { button.classList.add('bg-green-500'); statusSpan.textContent = '✅ 성공!'; button.onclick = () => startStage(index); }
-                    else if (index === appState.unlockedStage) { button.classList.add('bg-blue-500', 'animate-pulse'); statusSpan.textContent = '▶️ 도전!'; button.onclick = () => startStage(index); }
-                    else { button.classList.add('bg-gray-400', 'cursor-not-allowed'); statusSpan.textContent = '🔒 잠김'; }
+                    button.classList.add('bg-purple-500'); statusSpan.textContent = '🔁 연습하기'; button.onclick = () => startStage(index);
                 }
-                
                 button.appendChild(statusSpan); button.appendChild(textSpan); stageSelectionEl.appendChild(button);
             });
         }
@@ -197,25 +189,20 @@
         function newProblem() {
             const [num1, num2] = stages[appState.currentStage].generator();
             appState.currentAnswer = num1 * num2;
-            num1El.textContent = num1;
-            num2El.textContent = num2;
-            if (appState.isPracticeMode) {
-                progressTextEl.textContent = `연습 중 (문제 ${appState.currentProblemIndex + 1})`;
-            } else {
+            num1El.textContent = num1; num2El.textContent = num2;
+            if (appState.isChallengeMode) {
                 progressTextEl.textContent = `문제 ${appState.currentProblemIndex + 1} / ${appState.problemsPerStage}`;
+            } else {
+                progressTextEl.textContent = `연습 중 (문제 ${appState.currentProblemIndex + 1})`;
             }
-            answerInputEl.value = '';
-            answerInputEl.focus();
+            answerInputEl.value = ''; answerInputEl.focus();
         }
 
         function startStage(stageIndex) {
-            appState.currentStage = stageIndex;
-            appState.currentProblemIndex = 0;
-            stageSelectionEl.style.display = 'none';
-            quizAreaEl.style.display = 'block';
-            quizAreaEl.classList.add('fade-in');
-            stageTitleEl.textContent = stages[stageIndex].name;
-            if (appState.isPracticeMode) {
+            appState.currentStage = stageIndex; appState.currentProblemIndex = 0;
+            stageSelectionEl.style.display = 'none'; quizAreaEl.style.display = 'block';
+            quizAreaEl.classList.add('fade-in'); stageTitleEl.textContent = stages[stageIndex].name;
+            if (!appState.isChallengeMode) {
                 backBtnEl.classList.remove('hidden');
             } else {
                 backBtnEl.classList.add('hidden');
@@ -228,89 +215,49 @@
             feedbackEl.classList.remove('pop-in', 'shake', 'text-green-600', 'text-red-500');
             void feedbackEl.offsetWidth;
             if (userAnswer === appState.currentAnswer) {
-                feedbackEl.textContent = '정답! 참 잘했어요! 🎉';
-                feedbackEl.className += ' pop-in text-green-600';
-                submitBtnEl.disabled = true;
-                answerInputEl.disabled = true;
+                feedbackEl.textContent = '정답! 참 잘했어요! 🎉'; feedbackEl.className += ' pop-in text-green-600';
+                submitBtnEl.disabled = true; answerInputEl.disabled = true;
                 setTimeout(() => {
                     appState.currentProblemIndex++;
+                    submitBtnEl.disabled = false; answerInputEl.disabled = false;
                     
-                    // [변경] 입력창과 버튼을 먼저 활성화
-                    submitBtnEl.disabled = false;
-                    answerInputEl.disabled = false;
-                    
-                    if (appState.isPracticeMode) {
-                        feedbackEl.textContent = '';
-                        newProblem(); // 그 다음 새 문제 호출 (내부에서 focus)
+                    if (appState.isChallengeMode) {
+                        if (appState.currentProblemIndex >= appState.problemsPerStage) { completeStage(); }
+                        else { feedbackEl.textContent = ''; newProblem(); }
                     } else {
-                        if (appState.currentProblemIndex >= appState.problemsPerStage) {
-                            completeStage();
-                        } else {
-                            feedbackEl.textContent = '';
-                            newProblem(); // 그 다음 새 문제 호출 (내부에서 focus)
-                        }
+                        feedbackEl.textContent = ''; newProblem();
                     }
                 }, 1500);
             } else {
-                feedbackEl.textContent = '아쉬워요, 다시 풀어봐요! 🤔';
-                feedbackEl.className += ' shake text-red-500';
-                answerInputEl.select();
-                answerInputEl.focus();
+                feedbackEl.textContent = '아쉬워요, 다시 풀어봐요! 🤔'; feedbackEl.className += ' shake text-red-500';
+                answerInputEl.select(); answerInputEl.focus();
             }
         }
         
         function completeStage() {
-            if (appState.currentStage === appState.unlockedStage) {
-                appState.unlockedStage++;
-                saveProgress();
-            }
-            if (appState.unlockedStage >= stages.length) {
-                showFinalCelebration();
+            if (appState.currentStage === appState.unlockedStage) { appState.unlockedStage++; saveProgress(); }
+            if (appState.unlockedStage >= stages.length) { showFinalCelebration(); }
+            else { goBackToStages(); renderStageButtons(); }
+        }
+
+        function goBackToStages() { quizAreaEl.style.display = 'none'; stageSelectionEl.style.display = 'flex'; }
+        function showFinalCelebration() { quizAreaEl.style.display = 'none'; stageSelectionEl.style.display = 'none'; document.querySelector('header').style.display = 'none'; finalCelebrationEl.classList.remove('hidden'); launchFireworks(); }
+        function launchFireworks() { fireworksContainerEl.innerHTML = ''; const fireworkCount = 20; for (let i = 0; i < fireworkCount; i++) { const firework = document.createElement('div'); firework.className = 'firework'; firework.style.left = `${Math.random() * 100}%`; firework.style.animationDelay = `${Math.random() * 2}s`; fireworksContainerEl.appendChild(firework); } }
+        function saveProgress() { try { const dataToSave = JSON.stringify({ unlockedStage: appState.unlockedStage }); localStorage.setItem(STORAGE_KEY, dataToSave); } catch (e) { console.error("진행 상황 저장 실패:", e); } }
+        function loadProgress() { try { const savedData = localStorage.getItem(STORAGE_KEY); if (savedData) { const parsedData = JSON.parse(savedData); appState.unlockedStage = parsedData.unlockedStage || 0; } } catch (e) { console.error("진행 상황 불러오기 실패:", e); appState.unlockedStage = 0; } }
+        function resetProgress() { if (confirm('정말로 모든 도전 모드 진행 상황을 지우고 처음부터 시작할까요?')) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+
+        let titleClickCount = 0; let titleClickTimer = null;
+        function toggleChallengeMode() {
+            appState.isChallengeMode = !appState.isChallengeMode;
+            if (appState.isChallengeMode) {
+                bodyEl.classList.add('challenge-mode-active');
+                challengeModeIndicatorEl.classList.remove('hidden');
+                alert('도전 모드가 켜졌습니다. 곱셈 연산왕에 도전하세요!');
             } else {
-                goBackToStages();
-                renderStageButtons();
-            }
-        }
-
-        function goBackToStages() {
-            quizAreaEl.style.display = 'none';
-            stageSelectionEl.style.display = 'flex';
-        }
-
-        function showFinalCelebration() {
-            quizAreaEl.style.display = 'none';
-            stageSelectionEl.style.display = 'none';
-            document.querySelector('header').style.display = 'none';
-            finalCelebrationEl.classList.remove('hidden');
-            launchFireworks();
-        }
-
-        function launchFireworks() {
-            fireworksContainerEl.innerHTML = '';
-            const fireworkCount = 20;
-            for (let i = 0; i < fireworkCount; i++) {
-                const firework = document.createElement('div');
-                firework.className = 'firework';
-                firework.style.left = `${Math.random() * 100}%`;
-                firework.style.animationDelay = `${Math.random() * 2}s`;
-                fireworksContainerEl.appendChild(firework);
-            }
-        }
-
-        function saveProgress() { try { const dataToSave = JSON.stringify({ unlockedStage: appState.unlockedStage }); localStorage.setItem(STORAGE_KEY, dataToSave); } catch (e) { console.error("진행 상황을 저장하는 데 실패했습니다:", e); } }
-        function loadProgress() { try { const savedData = localStorage.getItem(STORAGE_KEY); if (savedData) { const parsedData = JSON.parse(savedData); appState.unlockedStage = parsedData.unlockedStage || 0; } } catch (e) { console.error("진행 상황을 불러오는 데 실패했습니다:", e); appState.unlockedStage = 0; } }
-        function resetProgress() { if (confirm('정말로 모든 진행 상황을 지우고 처음부터 시작할까요?')) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
-
-        let titleClickCount = 0;
-        let titleClickTimer = null;
-        function togglePracticeMode() {
-            appState.isPracticeMode = !appState.isPracticeMode;
-            if (appState.isPracticeMode) {
-                teacherModeIndicatorEl.classList.remove('hidden');
-                alert('비밀 연습 모드가 켜졌습니다. 모든 단계를 자유롭게 연습할 수 있습니다.');
-            } else {
-                teacherModeIndicatorEl.classList.add('hidden');
-                alert('연습 모드가 꺼졌습니다.');
+                bodyEl.classList.remove('challenge-mode-active');
+                challengeModeIndicatorEl.classList.add('hidden');
+                alert('연습 모드로 돌아갑니다.');
             }
             renderStageButtons();
         }
@@ -319,11 +266,7 @@
             titleClickCount++;
             clearTimeout(titleClickTimer);
             titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 1000);
-            if (titleClickCount >= 5) {
-                titleClickCount = 0;
-                clearTimeout(titleClickTimer);
-                togglePracticeMode();
-            }
+            if (titleClickCount >= 5) { titleClickCount = 0; clearTimeout(titleClickTimer); toggleChallengeMode(); }
         });
 
         submitBtnEl.addEventListener('click', checkAnswer);
@@ -331,11 +274,7 @@
         resetBtnEl.addEventListener('click', resetProgress);
         backBtnEl.addEventListener('click', goBackToStages);
         
-        function init() {
-            loadProgress();
-            renderStageButtons();
-        }
-        
+        function init() { loadProgress(); renderStageButtons(); }
         init();
     </script>
 </body>

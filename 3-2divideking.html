@@ -108,7 +108,6 @@
 
         .chapter-btn {
             padding: 15px 10px;
-            /* Inherits general-btn styles */
         }
 
         .chapter-btn.selected {
@@ -176,7 +175,6 @@
         }
         
         #menu-back-btn {
-            /* Using general-btn style */
             padding: 10px 20px;
             font-size: 0.9rem;
         }
@@ -229,14 +227,14 @@
         #numeric-inputs {
             display: flex;
             justify-content: center;
-            gap: 30px; /* 몫과 나머지 사이 간격 */
+            gap: 30px;
             margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
         .input-group {
             display: flex;
-            flex-direction: column; /* 라벨과 인풋을 위아래로 정렬 */
+            flex-direction: column;
             align-items: center;
             gap: 5px;
         }
@@ -279,7 +277,7 @@
         }
 
         #feedback-area {
-            min-height: 40px; /* 피드백 영역 최소 높이 확보 */
+            min-height: 40px;
             margin-top: 15px;
             margin-bottom: 15px;
         }
@@ -291,7 +289,6 @@
         }
         
         #show-answer-btn {
-            /* Inherits general-btn styles */
             background: var(--primary-color);
             color: white;
             padding: 10px 20px;
@@ -321,14 +318,20 @@
         /* --- 결과 화면 스타일 --- */
         #results-message {
             font-size: 2rem;
-            margin-bottom: 25px; /* 공간 추가 */
+            margin-bottom: 25px;
             color: var(--primary-color);
         }
 
         #results-details {
             font-size: 1.5rem;
-            margin-bottom: 35px; /* 공간 추가 */
-            line-height: 1.6; /* 줄간격 추가 */
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        #final-corrections {
+            font-size: 1.1rem;
+            color: #888;
+            margin-top: -10px;
         }
         
         .result-btn-group {
@@ -343,7 +346,7 @@
             #problem-text { font-size: 2.8rem; }
             .screen { padding: 20px; }
             #game-header { flex-direction: column; gap: 10px; }
-            #game-stats { order: 3; } /* 통계 맨 아래로 */
+            #game-stats { order: 3; }
             #menu-back-btn { order: 1; margin-bottom: 10px; }
             #chapter-title { order: 2; width: 100%; }
         }
@@ -355,7 +358,6 @@
     <div class="container">
         <h1>👑 나눗셈 왕 👑</h1>
         
-        <!-- 시작 화면 -->
         <div id="start-screen" class="screen">
             <h2>도전할 챕터를 골라주세요!</h2>
             <div class="chapter-grid">
@@ -369,20 +371,16 @@
                 <button class="chapter-btn general-btn" data-chapter="8">8. (세 자리 수)÷(한 자리 수)</button>
                 <button class="chapter-btn general-btn" data-chapter="9">9. 나머지가 있는 (세 자리 수)÷(한 자리 수)</button>
             </div>
-            
             <h2>모드를 선택하세요!</h2>
             <div class="mode-selection">
                 <input type="radio" id="practice-mode" name="mode" value="practice" checked>
                 <label for="practice-mode">🎓 연습 모드</label>
-                
                 <input type="radio" id="challenge-mode" name="mode" value="challenge">
                 <label for="challenge-mode">🏆 도전 모드</label>
             </div>
-            
             <button id="start-btn" class="start-btn" disabled>시작하기!</button>
         </div>
 
-        <!-- 게임 화면 -->
         <div id="game-screen" class="screen hidden">
             <div id="game-header">
                 <h2 id="chapter-title"></h2>
@@ -392,17 +390,13 @@
                 </div>
                 <button id="menu-back-btn" class="general-btn">🏠 메뉴로</button>
             </div>
-            
             <div id="progress-container">
                 <div id="progress-bar"></div>
             </div>
-            
             <div id="problem-container">
                 <div id="problem-text"></div>
             </div>
-
             <form id="answer-form">
-                <!-- 일반 문제용 (몫/나머지 입력) -->
                 <div id="numeric-inputs">
                     <div class="input-group">
                         <label for="quotient">몫:</label>
@@ -413,28 +407,23 @@
                         <input type="number" id="remainder" class="answer-input" autocomplete="off" inputmode="numeric">
                     </div>
                 </div>
-                
-                <!-- 7번 챕터용 (O/X 버튼) -->
                 <div id="boolean-question" class="hidden">
                     <button type="button" class="boolean-btn general-btn" data-answer="true">⭕ 맞아요</button>
                     <button type="button" class="boolean-btn general-btn" data-answer="false">❌ 틀려요</button>
                 </div>
-                
                 <div id="feedback-area">
                     <div id="feedback"></div>
                     <button type="button" id="show-answer-btn" class="general-btn hidden">정답 보기</button>
                 </div>
-                
                 <button id="check-btn">확인</button>
             </form>
-            
         </div>
 
-        <!-- 결과 화면 -->
         <div id="results-screen" class="screen hidden">
             <h2 id="results-message">참 잘했어요!</h2>
             <div id="results-details">
                 <p>총 10문제 중 <span id="final-score"></span>문제를 맞혔어요!</p>
+                <p id="final-corrections" class="hidden"></p> <!-- 수정해서 맞힌 개수 표시 영역 -->
                 <p id="final-time"></p>
             </div>
             <div class="result-btn-group">
@@ -446,11 +435,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM 요소 선택 ---
+    // --- DOM 요소 ---
     const startScreen = document.getElementById('start-screen');
     const gameScreen = document.getElementById('game-screen');
     const resultsScreen = document.getElementById('results-screen');
-    
     const chapterBtns = document.querySelectorAll('.chapter-btn');
     const startBtn = document.getElementById('start-btn');
     const chapterTitle = document.getElementById('chapter-title');
@@ -468,8 +456,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedback = document.getElementById('feedback');
     const menuBackBtn = document.getElementById('menu-back-btn');
     const showAnswerBtn = document.getElementById('show-answer-btn');
-
     const finalScore = document.getElementById('final-score');
+    const finalCorrections = document.getElementById('final-corrections'); // 추가
     const finalTime = document.getElementById('final-time');
     const restartBtn = document.getElementById('restart-btn');
     const mainMenuBtn = document.getElementById('main-menu-btn');
@@ -483,7 +471,9 @@ document.addEventListener('DOMContentLoaded', () => {
         score: 0,
         timer: 120,
         timerId: null,
-        totalQuestions: 10
+        totalQuestions: 10,
+        correctedCount: 0, // 추가: 수정해서 맞힌 문제 수
+        isRetry: false      // 추가: 현재 문제가 재시도인지 여부
     };
     
     const chapterNames = [
@@ -495,7 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // --- 이벤트 리스너 ---
-    
     chapterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             chapterBtns.forEach(b => b.classList.remove('selected'));
@@ -506,9 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
-        radio.addEventListener('click', () => {
-            state.mode = radio.value;
-        });
+        radio.addEventListener('click', () => { state.mode = radio.value; });
     });
     
     startBtn.addEventListener('click', startGame);
@@ -525,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handleAnswer();
     });
     
-    showAnswerBtn.addEventListener('click', showCorrectAnswer);
+    showAnswerBtn.addEventListener('click', showCorrectAnswerAndMoveNext);
 
     document.querySelectorAll('.boolean-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -550,6 +537,8 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentQuestionIndex = 0;
         state.score = 0;
         state.timer = 120;
+        state.correctedCount = 0; // 초기화
+        state.isRetry = false;     // 초기화
 
         state.questions = generateQuestions(state.chapter, state.totalQuestions);
         
@@ -568,7 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         showAnswerBtn.classList.add('hidden');
-        
         displayQuestion();
     }
 
@@ -578,6 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        state.isRetry = false; // 새 문제이므로 재시도 상태 초기화
         const q = state.questions[state.currentQuestionIndex];
         problemText.innerHTML = q.text;
         
@@ -600,14 +589,9 @@ document.addEventListener('DOMContentLoaded', () => {
             checkBtn.classList.remove('hidden');
             
             const hasRemainder = q.remainder !== 0 || (state.chapter >= 5 && state.chapter !== 8);
-            if (hasRemainder) {
-                remainderGroup.classList.remove('hidden');
-            } else {
-                remainderGroup.classList.add('hidden');
-            }
+            remainderGroup.classList.toggle('hidden', !hasRemainder);
             quotientInput.focus();
         }
-        
         updateProgress();
     }
     
@@ -624,63 +608,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const isCorrect = userQuotient === currentQ.quotient && userRemainder === currentQ.remainder;
-        
         processAnswer(isCorrect);
     }
     
     function handleBooleanAnswer(userAnswer) {
-        const currentQ = state.questions[state.currentQuestionIndex];
-        const isCorrect = userAnswer === currentQ.isEquationCorrect;
-        
+        const isCorrect = userAnswer === state.questions[state.currentQuestionIndex].isEquationCorrect;
         processAnswer(isCorrect);
         document.querySelectorAll('.boolean-btn').forEach(btn => btn.disabled = true);
     }
     
-    function showCorrectAnswer() {
+    function showCorrectAnswerAndMoveNext() {
         const q = state.questions[state.currentQuestionIndex];
         showAnswerBtn.classList.add('hidden');
         
-        let answerText = "";
-        if(state.chapter === 7) {
-            answerText = `정답: '${q.isEquationCorrect ? '⭕ 맞아요' : '❌ 틀려요'}'`;
-        } else {
-            answerText = `정답: 몫 ${q.quotient}`;
-            if (!remainderGroup.classList.contains('hidden') || q.remainder > 0) {
-                answerText += `, 나머지 ${q.remainder}`;
-            }
+        let answerText = `정답: 몫 ${q.quotient}`;
+        if (!remainderGroup.classList.contains('hidden') || q.remainder > 0) {
+            answerText += `, 나머지 ${q.remainder}`;
         }
         feedback.textContent = "✔ " + answerText;
         feedback.className = 'feedback-correct';
+        checkBtn.disabled = true;
 
         setTimeout(() => {
             state.currentQuestionIndex++;
             displayQuestion();
-            document.querySelectorAll('.boolean-btn').forEach(btn => btn.disabled = false);
-        }, 1500);
+        }, 2000);
     }
 
     function processAnswer(isCorrect) {
-        checkBtn.disabled = true;
-
         if (isCorrect) {
             feedback.textContent = '딩동댕! 정답이에요! 🎉';
             feedback.className = 'feedback-correct';
             state.score++;
-            
+
+            if (state.isRetry) { // 재시도해서 맞혔다면
+                state.correctedCount++;
+            }
+
+            checkBtn.disabled = true;
+            showAnswerBtn.classList.add('hidden');
+
             setTimeout(() => {
                 state.currentQuestionIndex++;
                 displayQuestion();
                 document.querySelectorAll('.boolean-btn').forEach(btn => btn.disabled = false);
             }, 1500);
 
-        } else {
+        } else { // 오답일 경우
             feedback.className = 'feedback-wrong';
             
             if (state.mode === 'practice') {
-                feedback.textContent = '아쉬워요, 다시 생각해봐요! 😥';
-                showAnswerBtn.classList.remove('hidden');
-            } else {
+                state.isRetry = true; // 재시도 상태로 변경
+                checkBtn.disabled = false; // 버튼 다시 활성화
+                checkBtn.textContent = '다시 확인';
+                feedback.textContent = '아쉽네요, 다시 한번 풀어볼까요? 🤔';
+                showAnswerBtn.classList.remove('hidden'); // 정답 보기(포기) 버튼 표시
+            } else { // 도전 모드
                 feedback.textContent = '오답입니다! 😥';
+                checkBtn.disabled = true;
                 setTimeout(() => {
                     state.currentQuestionIndex++;
                     displayQuestion();
@@ -688,7 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1500);
             }
         }
-        
         scoreDisplay.textContent = `점수: ${state.score}`;
     }
 
@@ -724,6 +708,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             resultsMessage.textContent = '🤔 아쉬워요! 연습하면 더 잘할 수 있어요.';
         }
+        
+        // 다시 풀어 맞힌 개수 표시
+        if (state.correctedCount > 0) {
+            finalCorrections.textContent = `(이 중 ${state.correctedCount}개는 다시 풀어 맞혔어요!)`;
+            finalCorrections.classList.remove('hidden');
+        } else {
+            finalCorrections.classList.add('hidden');
+        }
 
         if (state.mode === 'challenge') {
             const timeTaken = 120 - state.timer;
@@ -736,147 +728,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetToMainMenu() {
         if (state.timerId) clearInterval(state.timerId);
-
         gameScreen.classList.add('hidden');
         resultsScreen.classList.add('hidden');
         startScreen.classList.remove('hidden');
-        
         state.chapter = null;
         startBtn.disabled = true;
         chapterBtns.forEach(b => b.classList.remove('selected'));
     }
 
-    // --- 문제 생성 로직 (기존 유지) ---
+    // --- 문제 생성 로직 (기존과 동일) ---
     const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
     function generateQuestions(chapter, count) {
         const questions = new Set();
         while (questions.size < count) {
             let q;
             switch(chapter) {
-                case 1: q = genCh1(); break;
-                case 2: q = genCh2(); break;
-                case 3: q = genCh3(); break;
-                case 4: q = genCh4(); break;
-                case 5: q = genCh5(); break;
-                case 6: q = genCh6(); break;
-                case 7: q = genCh7(); break;
-                case 8: q = genCh8(); break;
+                case 1: q = genCh1(); break; case 2: q = genCh2(); break;
+                case 3: q = genCh3(); break; case 4: q = genCh4(); break;
+                case 5: q = genCh5(); break; case 6: q = genCh6(); break;
+                case 7: q = genCh7(); break; case 8: q = genCh8(); break;
                 case 9: q = genCh9(); break;
             }
             questions.add(JSON.stringify(q));
         }
         return Array.from(questions).map(q => JSON.parse(q));
     }
-
-    function genCh1() {
-        const divisor = randInt(2, 4);
-        const quotient_tens = randInt(1, 4);
-        const quotient = quotient_tens * 10;
-        const dividend = divisor * quotient;
-        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
-    }
-
-    function genCh2() {
-        const divisor = randInt(2, 4);
-        const quotient_tens = randInt(1, 4);
-        const quotient_ones = randInt(1, Math.floor(9 / divisor));
-        const quotient = quotient_tens * 10 + quotient_ones;
-        const dividend = divisor * quotient;
-        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
-    }
-    
-    function genCh3() {
-        const divisor = randInt(3, 8);
-        const quotient = randInt(11, 30);
-        const dividend = divisor * quotient;
-        if ( (Math.floor(dividend/10)) % divisor !== 0 && dividend % 10 === 0) {
-             return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
-        }
-        return genCh3();
-    }
-    
-    function genCh4() {
-        const divisor = randInt(3, 8);
-        const quotient = randInt(11, 30);
-        const dividend = divisor * quotient;
-        if ( (Math.floor(dividend/10)) % divisor !== 0 && dividend % 10 !== 0) {
-            return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
-        }
-        return genCh4();
-    }
-
-    function genCh5() {
-        const divisor = randInt(2, 4);
-        const quotient_tens = randInt(1, 4);
-        const quotient_ones = randInt(0, Math.floor(9 / divisor));
-        const quotient = quotient_tens * 10 + quotient_ones;
-        const remainder = randInt(1, divisor - 1);
-        const dividend = divisor * quotient + remainder;
-        if ( (Math.floor(dividend/10)) % divisor === 0) {
-             return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder };
-        }
-        return genCh5();
-    }
-
-    function genCh6() {
-        const divisor = randInt(3, 8);
-        const quotient = randInt(11, 30);
-        const remainder = randInt(1, divisor - 1);
-        const dividend = divisor * quotient + remainder;
-        if ( (Math.floor(dividend/10)) % divisor !== 0) {
-            return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder };
-        }
-        return genCh6();
-    }
-
-    function genCh7() {
-        const divisor = randInt(3, 9);
-        const quotient = randInt(5, 20);
-        const remainder = randInt(0, divisor - 1);
-        const dividend = divisor * quotient + remainder;
-        
-        const isEquationCorrect = Math.random() > 0.4;
-        let displayedQuotient = quotient;
-        let displayedRemainder = remainder;
-
-        if (!isEquationCorrect) {
-            if (Math.random() > 0.5) {
-                displayedQuotient += randInt(1,3) * (Math.random() > 0.5 ? 1 : -1);
-                if (displayedQuotient < 0) displayedQuotient = 0;
-            } else {
-                displayedRemainder = remainder;
-                while (displayedRemainder === remainder) {
-                    if (remainder === 0) {
-                        displayedRemainder = randInt(1, divisor - 1);
-                    } else {
-                        displayedRemainder = (Math.random() > 0.5) ? 0 : divisor; 
-                    }
-                }
-            }
-        }
-        
-        let remainderText = displayedRemainder > 0 ? `... ${displayedRemainder}` : '';
-        const text = `${dividend} &div; ${divisor} = ${displayedQuotient} ${remainderText}`;
-        return { text, isEquationCorrect };
-    }
-
-    function genCh8() {
-        const divisor = randInt(2, 9);
-        const quotient = randInt(101, 300);
-        const dividend = divisor * quotient;
-        if(dividend > 999) return genCh8();
-        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
-    }
-
-    function genCh9() {
-        const divisor = randInt(2, 9);
-        const quotient = randInt(101, 300);
-        const remainder = randInt(1, divisor - 1);
-        const dividend = divisor * quotient + remainder;
-        if(dividend > 999) return genCh9();
-        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder };
-    }
+    function genCh1(){const t=randInt(2,4),e=10*randInt(1,4),n=t*e;return{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}}
+    function genCh2(){const t=randInt(2,4),e=10*randInt(1,4)+randInt(1,Math.floor(9/t)),n=t*e;return{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}}
+    function genCh3(){const t=randInt(3,8),e=randInt(11,30),n=t*e;return Math.floor(n/10)%t!=0&&n%10==0?{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}:genCh3()}
+    function genCh4(){const t=randInt(3,8),e=randInt(11,30),n=t*e;return Math.floor(n/10)%t!=0&&n%10!=0?{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}:genCh4()}
+    function genCh5(){const t=randInt(2,4),e=10*randInt(1,4)+randInt(0,Math.floor(9/t)),n=randInt(1,t-1),r=t*e+n;return Math.floor(r/10)%t==0?{text:`${r} &div; ${t}`,dividend:r,divisor:t,quotient:e,remainder:n}:genCh5()}
+    function genCh6(){const t=randInt(3,8),e=randInt(11,30),n=randInt(1,t-1),r=t*e+n;return Math.floor(r/10)%t!=0?{text:`${r} &div; ${t}`,dividend:r,divisor:t,quotient:e,remainder:n}:genCh6()}
+    function genCh7(){const t=randInt(3,9),e=randInt(5,20),n=randInt(0,t-1),r=t*e+n,a=Math.random()>.4;let i=e,d=n;if(!a)if(Math.random()>.5)(i+=randInt(1,3)*(Math.random()>.5?1:-1))<0&&(i=0);else for(;d===n;)d=0===n?randInt(1,t-1):Math.random()>.5?0:t;let o=d>0?`... ${d}`:"";return{text:`${r} &div; ${t} = ${i} ${o}`,isEquationCorrect:a}}
+    function genCh8(){const t=randInt(2,9),e=randInt(101,300),n=t*e;return n>999?genCh8():{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}}
+    function genCh9(){const t=randInt(2,9),e=randInt(101,300),n=randInt(1,t-1),r=t*e+n;return r>999?genCh9():{text:`${r} &div; ${t}`,dividend:r,divisor:t,quotient:e,remainder:n}}
 });
 </script>
 

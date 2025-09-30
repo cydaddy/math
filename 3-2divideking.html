@@ -319,10 +319,24 @@
         }
 
         /* --- 결과 화면 스타일 --- */
-        .result-btn {
-            /* Inherits general-btn styles */
+        #results-message {
+            font-size: 2rem;
+            margin-bottom: 25px; /* 공간 추가 */
+            color: var(--primary-color);
+        }
+
+        #results-details {
+            font-size: 1.5rem;
+            margin-bottom: 35px; /* 공간 추가 */
+            line-height: 1.6; /* 줄간격 추가 */
         }
         
+        .result-btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
         /* 반응형 디자인 */
         @media (max-width: 600px) {
             h1 { font-size: 2.5rem; }
@@ -453,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkBtn = document.getElementById('check-btn');
     const feedback = document.getElementById('feedback');
     const menuBackBtn = document.getElementById('menu-back-btn');
-    const showAnswerBtn = document.getElementById('show-answer-btn'); // New element
+    const showAnswerBtn = document.getElementById('show-answer-btn');
 
     const finalScore = document.getElementById('final-score');
     const finalTime = document.getElementById('final-time');
@@ -482,7 +496,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 이벤트 리스너 ---
     
-    // 챕터 선택
     chapterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             chapterBtns.forEach(b => b.classList.remove('selected'));
@@ -492,41 +505,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 모드 선택
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
         radio.addEventListener('click', () => {
             state.mode = radio.value;
         });
     });
     
-    // 시작 버튼
     startBtn.addEventListener('click', startGame);
     
-    // 메뉴 돌아가기 버튼 (게임 중)
     menuBackBtn.addEventListener('click', () => {
         if (confirm("현재 진행 중인 게임이 초기화됩니다. 메인 메뉴로 돌아가시겠어요?")) {
             resetToMainMenu();
         }
     });
 
-    // 확인 버튼
     checkBtn.addEventListener('click', handleAnswer);
     answerForm.addEventListener('submit', (e) => {
         e.preventDefault();
         handleAnswer();
     });
     
-    // 정답 보기 버튼 (연습 모드 오답 시)
     showAnswerBtn.addEventListener('click', showCorrectAnswer);
 
-    // 7번 챕터 O/X 버튼
     document.querySelectorAll('.boolean-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             handleBooleanAnswer(e.target.dataset.answer === 'true');
         });
     });
 
-    // 결과 화면 버튼
     restartBtn.addEventListener('click', () => {
         resultsScreen.classList.add('hidden');
         startGame();
@@ -539,18 +545,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 핵심 함수 ---
     
     function startGame() {
-        // 타이머 초기화 (이전 타이머가 있다면 멈춤)
         if (state.timerId) clearInterval(state.timerId);
 
-        // 초기화
         state.currentQuestionIndex = 0;
         state.score = 0;
-        state.timer = 120; // 2분 고정
+        state.timer = 120;
 
-        // 문제 생성
         state.questions = generateQuestions(state.chapter, state.totalQuestions);
         
-        // UI 업데이트
         startScreen.classList.add('hidden');
         resultsScreen.classList.add('hidden');
         gameScreen.classList.remove('hidden');
@@ -565,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             timerDisplay.classList.add('hidden');
         }
         
-        showAnswerBtn.classList.add('hidden'); // 정답 보기 버튼 숨기기
+        showAnswerBtn.classList.add('hidden');
         
         displayQuestion();
     }
@@ -585,7 +587,6 @@ document.addEventListener('DOMContentLoaded', () => {
         checkBtn.textContent = '확인';
         checkBtn.disabled = false;
         
-        // 입력 필드 초기화 및 설정
         quotientInput.value = '';
         remainderInput.value = '';
 
@@ -598,7 +599,6 @@ document.addEventListener('DOMContentLoaded', () => {
             booleanQuestion.classList.add('hidden');
             checkBtn.classList.remove('hidden');
             
-            // 나머지가 없는 챕터 처리 (1, 2, 3, 4, 8)
             const hasRemainder = q.remainder !== 0 || (state.chapter >= 5 && state.chapter !== 8);
             if (hasRemainder) {
                 remainderGroup.classList.remove('hidden');
@@ -616,7 +616,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const userQuotient = parseInt(quotientInput.value);
         const userRemainder = remainderGroup.classList.contains('hidden') ? 0 : (parseInt(remainderInput.value) || 0);
 
-        // 입력이 비어있다면 무시
         if (isNaN(userQuotient)) {
             feedback.textContent = '몫을 입력해 주세요!';
             feedback.className = 'feedback-wrong';
@@ -641,20 +640,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const q = state.questions[state.currentQuestionIndex];
         showAnswerBtn.classList.add('hidden');
         
-        // 정답 텍스트 생성
         let answerText = "";
         if(state.chapter === 7) {
             answerText = `정답: '${q.isEquationCorrect ? '⭕ 맞아요' : '❌ 틀려요'}'`;
         } else {
             answerText = `정답: 몫 ${q.quotient}`;
-            if (!remainderGroup.classList.contains('hidden')) {
+            if (!remainderGroup.classList.contains('hidden') || q.remainder > 0) {
                 answerText += `, 나머지 ${q.remainder}`;
             }
         }
         feedback.textContent = "✔ " + answerText;
         feedback.className = 'feedback-correct';
 
-        // 다음 문제로 넘어감
         setTimeout(() => {
             state.currentQuestionIndex++;
             displayQuestion();
@@ -663,14 +660,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function processAnswer(isCorrect) {
-        checkBtn.disabled = true; // 확인 버튼 비활성화
+        checkBtn.disabled = true;
 
         if (isCorrect) {
             feedback.textContent = '딩동댕! 정답이에요! 🎉';
             feedback.className = 'feedback-correct';
             state.score++;
             
-            // 정답인 경우 바로 다음 문제로 넘어감 (딜레이 1.5초)
             setTimeout(() => {
                 state.currentQuestionIndex++;
                 displayQuestion();
@@ -678,14 +674,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 1500);
 
         } else {
-            feedback.textContent = '아쉬워요, 다시 생각해봐요! 😥';
             feedback.className = 'feedback-wrong';
             
             if (state.mode === 'practice') {
-                // 연습 모드: 정답 보기 버튼 활성화
+                feedback.textContent = '아쉬워요, 다시 생각해봐요! 😥';
                 showAnswerBtn.classList.remove('hidden');
             } else {
-                // 도전 모드: 오답이라도 1.5초 후 다음 문제로 넘어감
+                feedback.textContent = '오답입니다! 😥';
                 setTimeout(() => {
                     state.currentQuestionIndex++;
                     displayQuestion();
@@ -740,7 +735,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetToMainMenu() {
-        // 모든 타이머 중지 및 화면 초기화
         if (state.timerId) clearInterval(state.timerId);
 
         gameScreen.classList.add('hidden');
@@ -775,7 +769,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(questions).map(q => JSON.parse(q));
     }
 
-    // 1. 내림 없는 (몇십) ÷ (몇) (예: 60 ÷ 3)
     function genCh1() {
         const divisor = randInt(2, 4);
         const quotient_tens = randInt(1, 4);
@@ -784,7 +777,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
     }
 
-    // 2. 내림 없는 (몇십몇) ÷ (몇) (예: 69 ÷ 3)
     function genCh2() {
         const divisor = randInt(2, 4);
         const quotient_tens = randInt(1, 4);
@@ -794,7 +786,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
     }
     
-    // 3. 내림 있는 (몇십) ÷ (몇) (예: 70 ÷ 5)
     function genCh3() {
         const divisor = randInt(3, 8);
         const quotient = randInt(11, 30);
@@ -805,7 +796,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return genCh3();
     }
     
-    // 4. 내림 있는 (몇십몇) ÷ (몇) (예: 72 ÷ 3)
     function genCh4() {
         const divisor = randInt(3, 8);
         const quotient = randInt(11, 30);
@@ -816,7 +806,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return genCh4();
     }
 
-    // 5. 내림 없고 나머지 있는 (몇십몇) ÷ (몇) (예: 68 ÷ 3)
     function genCh5() {
         const divisor = randInt(2, 4);
         const quotient_tens = randInt(1, 4);
@@ -830,7 +819,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return genCh5();
     }
 
-    // 6. 내림 있고 나머지 있는 (몇십몇) ÷ (몇) (예: 75 ÷ 4)
     function genCh6() {
         const divisor = randInt(3, 8);
         const quotient = randInt(11, 30);
@@ -842,7 +830,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return genCh6();
     }
 
-    // 7. 계산이 맞는지 확인하기
     function genCh7() {
         const divisor = randInt(3, 9);
         const quotient = randInt(5, 20);
@@ -854,17 +841,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let displayedRemainder = remainder;
 
         if (!isEquationCorrect) {
-            if (Math.random() > 0.5) { // 몫을 틀리게
+            if (Math.random() > 0.5) {
                 displayedQuotient += randInt(1,3) * (Math.random() > 0.5 ? 1 : -1);
                 if (displayedQuotient < 0) displayedQuotient = 0;
-            } else { // 나머지를 틀리게
+            } else {
                 displayedRemainder = remainder;
                 while (displayedRemainder === remainder) {
-                    // 나머지가 0일 때는 나머지를 1~divisor-1로 틀리게 만듦
                     if (remainder === 0) {
                         displayedRemainder = randInt(1, divisor - 1);
                     } else {
-                        // 나머지가 0이 아닐 때는 (0 또는 divisor 이상)으로 틀리게 만듦
                         displayedRemainder = (Math.random() > 0.5) ? 0 : divisor; 
                     }
                 }
@@ -876,7 +861,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { text, isEquationCorrect };
     }
 
-    // 8. (세 자리 수) ÷ (한 자리 수)
     function genCh8() {
         const divisor = randInt(2, 9);
         const quotient = randInt(101, 300);
@@ -885,7 +869,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
     }
 
-    // 9. 나머지가 있는 (세 자리 수) ÷ (한 자리 수)
     function genCh9() {
         const divisor = randInt(2, 9);
         const quotient = randInt(101, 300);

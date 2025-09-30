@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 나눗셈 왕! - 초등학교 3학년 2학기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #e0e5ec;
+            --primary-color: #4a86e8;
+            --green-color: #6abf69;
+            --red-color: #ff6e6e;
+            --text-color: #555;
+            --light-shadow: rgba(255, 255, 255, 0.9);
+            --dark-shadow: rgba(163, 177, 198, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px var(--dark-shadow);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- 화면 공통 스타일 --- */
+        .screen {
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 8px 8px 15px var(--dark-shadow), -8px -8px 15px var(--light-shadow);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- 버튼 공통 스타일 --- */
+        .general-btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--bg-color);
+            box-shadow: 5px 5px 10px var(--dark-shadow), -5px -5px 10px var(--light-shadow);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-color);
+        }
+        .general-btn:hover {
+            transform: translateY(-2px);
+            color: var(--primary-color);
+        }
+        .general-btn:active {
+            box-shadow: inset 3px 3px 7px var(--dark-shadow), inset -3px -3px 7px var(--light-shadow);
+            transform: translateY(0);
+        }
+
+
+        /* --- 시작 화면 스타일 --- */
+        #start-screen .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .chapter-btn {
+            padding: 15px 10px;
+            /* Inherits general-btn styles */
+        }
+
+        .chapter-btn.selected {
+            box-shadow: inset 5px 5px 10px var(--dark-shadow), inset -5px -5px 10px var(--light-shadow);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .mode-selection {
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .mode-selection label {
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 5px 5px 10px var(--dark-shadow), -5px -5px 10px var(--light-shadow);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .mode-selection input[type="radio"] {
+            display: none;
+        }
+
+        .mode-selection input[type="radio"]:checked + label {
+            box-shadow: inset 5px 5px 10px var(--dark-shadow), inset -5px -5px 10px var(--light-shadow);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .start-btn {
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 5px 5px 10px var(--dark-shadow), -5px -5px 10px var(--light-shadow);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .start-btn:hover {
+            background: #3a7bd5;
+            transform: translateY(-3px);
+        }
+        
+        .start-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -2px -2px 5px var(--light-shadow);
+        }
+
+        /* --- 게임 화면 스타일 --- */
+        #game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        #menu-back-btn {
+            /* Using general-btn style */
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+
+        #progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(163, 177, 198, 0.3);
+            border-radius: 5px;
+            margin: 10px 0;
+            box-shadow: inset 2px 2px 5px var(--dark-shadow), inset -2px -2px 5px var(--light-shadow);
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--green-color);
+            border-radius: 5px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        #game-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #problem-container {
+            margin: 30px 0;
+            padding: 40px 20px;
+            border-radius: 15px;
+            box-shadow: inset 5px 5px 10px var(--dark-shadow), inset -5px -5px 10px var(--light-shadow);
+        }
+        
+        #problem-text {
+            font-size: 3.5rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+        }
+
+        #answer-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #numeric-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 30px; /* 몫과 나머지 사이 간격 */
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column; /* 라벨과 인풋을 위아래로 정렬 */
+            align-items: center;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 1rem;
+        }
+
+        .answer-input {
+            width: 100px;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            background-color: var(--bg-color);
+            box-shadow: inset 3px 3px 6px var(--dark-shadow), inset -3px -3px 6px var(--light-shadow);
+            color: var(--text-color);
+        }
+
+        .answer-input:focus {
+            outline: none;
+            box-shadow: inset 3px 3px 6px var(--dark-shadow), inset -3px -3px 6px var(--light-shadow), 0 0 0 2px var(--primary-color);
+        }
+
+        #check-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            background: var(--green-color);
+            color: white;
+            box-shadow: 5px 5px 10px var(--dark-shadow), -5px -5px 10px var(--light-shadow);
+            transition: all 0.2s ease-in-out;
+        }
+        #check-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        #feedback-area {
+            min-height: 40px; /* 피드백 영역 최소 높이 확보 */
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        
+        #feedback {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        #show-answer-btn {
+            /* Inherits general-btn styles */
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+        }
+
+        .feedback-correct { color: var(--green-color); animation: bounce 0.5s; }
+        .feedback-wrong { color: var(--red-color); animation: shake 0.5s; }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
+            20%, 40%, 60%, 80% {transform: translateX(5px);}
+        }
+        
+        .boolean-question button {
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            margin: 0 10px;
+        }
+
+        /* --- 결과 화면 스타일 --- */
+        .result-btn {
+            /* Inherits general-btn styles */
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            #problem-text { font-size: 2.8rem; }
+            .screen { padding: 20px; }
+            #game-header { flex-direction: column; gap: 10px; }
+            #game-stats { order: 3; } /* 통계 맨 아래로 */
+            #menu-back-btn { order: 1; margin-bottom: 10px; }
+            #chapter-title { order: 2; width: 100%; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>👑 나눗셈 왕 👑</h1>
+        
+        <!-- 시작 화면 -->
+        <div id="start-screen" class="screen">
+            <h2>도전할 챕터를 골라주세요!</h2>
+            <div class="chapter-grid">
+                <button class="chapter-btn general-btn" data-chapter="1">1. 내림 없는 (몇십)÷(몇)</button>
+                <button class="chapter-btn general-btn" data-chapter="2">2. 내림 없는 (몇십몇)÷(몇)</button>
+                <button class="chapter-btn general-btn" data-chapter="3">3. 내림 있는 (몇십)÷(몇)</button>
+                <button class="chapter-btn general-btn" data-chapter="4">4. 내림 있는 (몇십몇)÷(몇)</button>
+                <button class="chapter-btn general-btn" data-chapter="5">5. 내림 없고 나머지 있는 (몇십몇)÷(몇)</button>
+                <button class="chapter-btn general-btn" data-chapter="6">6. 내림 있고 나머지 있는 (몇십몇)÷(몇)</button>
+                <button class="chapter-btn general-btn" data-chapter="7">7. 나머지가 있는 나눗셈 계산 확인하기</button>
+                <button class="chapter-btn general-btn" data-chapter="8">8. (세 자리 수)÷(한 자리 수)</button>
+                <button class="chapter-btn general-btn" data-chapter="9">9. 나머지가 있는 (세 자리 수)÷(한 자리 수)</button>
+            </div>
+            
+            <h2>모드를 선택하세요!</h2>
+            <div class="mode-selection">
+                <input type="radio" id="practice-mode" name="mode" value="practice" checked>
+                <label for="practice-mode">🎓 연습 모드</label>
+                
+                <input type="radio" id="challenge-mode" name="mode" value="challenge">
+                <label for="challenge-mode">🏆 도전 모드</label>
+            </div>
+            
+            <button id="start-btn" class="start-btn" disabled>시작하기!</button>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="game-screen" class="screen hidden">
+            <div id="game-header">
+                <h2 id="chapter-title"></h2>
+                <div id="game-stats">
+                    <span id="score">점수: 0</span>
+                    <span id="timer" class="hidden">시간: 120</span>
+                </div>
+                <button id="menu-back-btn" class="general-btn">🏠 메뉴로</button>
+            </div>
+            
+            <div id="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+            
+            <div id="problem-container">
+                <div id="problem-text"></div>
+            </div>
+
+            <form id="answer-form">
+                <!-- 일반 문제용 (몫/나머지 입력) -->
+                <div id="numeric-inputs">
+                    <div class="input-group">
+                        <label for="quotient">몫:</label>
+                        <input type="number" id="quotient" class="answer-input" autocomplete="off" inputmode="numeric">
+                    </div>
+                    <div class="input-group" id="remainder-group">
+                        <label for="remainder">나머지:</label>
+                        <input type="number" id="remainder" class="answer-input" autocomplete="off" inputmode="numeric">
+                    </div>
+                </div>
+                
+                <!-- 7번 챕터용 (O/X 버튼) -->
+                <div id="boolean-question" class="hidden">
+                    <button type="button" class="boolean-btn general-btn" data-answer="true">⭕ 맞아요</button>
+                    <button type="button" class="boolean-btn general-btn" data-answer="false">❌ 틀려요</button>
+                </div>
+                
+                <div id="feedback-area">
+                    <div id="feedback"></div>
+                    <button type="button" id="show-answer-btn" class="general-btn hidden">정답 보기</button>
+                </div>
+                
+                <button id="check-btn">확인</button>
+            </form>
+            
+        </div>
+
+        <!-- 결과 화면 -->
+        <div id="results-screen" class="screen hidden">
+            <h2 id="results-message">참 잘했어요!</h2>
+            <div id="results-details">
+                <p>총 10문제 중 <span id="final-score"></span>문제를 맞혔어요!</p>
+                <p id="final-time"></p>
+            </div>
+            <div class="result-btn-group">
+                <button id="restart-btn" class="general-btn">같은 챕터 다시 도전</button>
+                <button id="main-menu-btn" class="general-btn">처음으로</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM 요소 선택 ---
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    
+    const chapterBtns = document.querySelectorAll('.chapter-btn');
+    const startBtn = document.getElementById('start-btn');
+    const chapterTitle = document.getElementById('chapter-title');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const progressBar = document.getElementById('progress-bar');
+    const problemText = document.getElementById('problem-text');
+    const answerForm = document.getElementById('answer-form');
+    const numericInputs = document.getElementById('numeric-inputs');
+    const quotientInput = document.getElementById('quotient');
+    const remainderGroup = document.getElementById('remainder-group');
+    const remainderInput = document.getElementById('remainder');
+    const booleanQuestion = document.getElementById('boolean-question');
+    const checkBtn = document.getElementById('check-btn');
+    const feedback = document.getElementById('feedback');
+    const menuBackBtn = document.getElementById('menu-back-btn');
+    const showAnswerBtn = document.getElementById('show-answer-btn'); // New element
+
+    const finalScore = document.getElementById('final-score');
+    const finalTime = document.getElementById('final-time');
+    const restartBtn = document.getElementById('restart-btn');
+    const mainMenuBtn = document.getElementById('main-menu-btn');
+
+    // --- 게임 상태 변수 ---
+    let state = {
+        chapter: null,
+        mode: 'practice',
+        questions: [],
+        currentQuestionIndex: 0,
+        score: 0,
+        timer: 120,
+        timerId: null,
+        totalQuestions: 10
+    };
+    
+    const chapterNames = [
+        "1. 내림 없는 (몇십)÷(몇)", "2. 내림 없는 (몇십몇)÷(몇)",
+        "3. 내림 있는 (몇십)÷(몇)", "4. 내림 있는 (몇십몇)÷(몇)",
+        "5. 내림 없고 나머지 있는 (몇십몇)÷(몇)", "6. 내림 있고 나머지 있는 (몇십몇)÷(몇)",
+        "7. 나머지가 있는 나눗셈 계산 확인하기", "8. (세 자리 수)÷(한 자리 수)",
+        "9. 나머지가 있는 (세 자리 수)÷(한 자리 수)"
+    ];
+
+    // --- 이벤트 리스너 ---
+    
+    // 챕터 선택
+    chapterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            chapterBtns.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.chapter = parseInt(btn.dataset.chapter);
+            startBtn.disabled = false;
+        });
+    });
+
+    // 모드 선택
+    document.querySelectorAll('input[name="mode"]').forEach(radio => {
+        radio.addEventListener('click', () => {
+            state.mode = radio.value;
+        });
+    });
+    
+    // 시작 버튼
+    startBtn.addEventListener('click', startGame);
+    
+    // 메뉴 돌아가기 버튼 (게임 중)
+    menuBackBtn.addEventListener('click', () => {
+        if (confirm("현재 진행 중인 게임이 초기화됩니다. 메인 메뉴로 돌아가시겠어요?")) {
+            resetToMainMenu();
+        }
+    });
+
+    // 확인 버튼
+    checkBtn.addEventListener('click', handleAnswer);
+    answerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleAnswer();
+    });
+    
+    // 정답 보기 버튼 (연습 모드 오답 시)
+    showAnswerBtn.addEventListener('click', showCorrectAnswer);
+
+    // 7번 챕터 O/X 버튼
+    document.querySelectorAll('.boolean-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            handleBooleanAnswer(e.target.dataset.answer === 'true');
+        });
+    });
+
+    // 결과 화면 버튼
+    restartBtn.addEventListener('click', () => {
+        resultsScreen.classList.add('hidden');
+        startGame();
+    });
+    mainMenuBtn.addEventListener('click', () => {
+        resultsScreen.classList.add('hidden');
+        resetToMainMenu();
+    });
+
+    // --- 핵심 함수 ---
+    
+    function startGame() {
+        // 타이머 초기화 (이전 타이머가 있다면 멈춤)
+        if (state.timerId) clearInterval(state.timerId);
+
+        // 초기화
+        state.currentQuestionIndex = 0;
+        state.score = 0;
+        state.timer = 120; // 2분 고정
+
+        // 문제 생성
+        state.questions = generateQuestions(state.chapter, state.totalQuestions);
+        
+        // UI 업데이트
+        startScreen.classList.add('hidden');
+        resultsScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        
+        chapterTitle.textContent = chapterNames[state.chapter - 1];
+        scoreDisplay.textContent = `점수: 0`;
+
+        if (state.mode === 'challenge') {
+            timerDisplay.classList.remove('hidden');
+            startTimer();
+        } else {
+            timerDisplay.classList.add('hidden');
+        }
+        
+        showAnswerBtn.classList.add('hidden'); // 정답 보기 버튼 숨기기
+        
+        displayQuestion();
+    }
+
+    function displayQuestion() {
+        if (state.currentQuestionIndex >= state.totalQuestions) {
+            endGame();
+            return;
+        }
+
+        const q = state.questions[state.currentQuestionIndex];
+        problemText.innerHTML = q.text;
+        
+        feedback.textContent = '';
+        feedback.className = '';
+        showAnswerBtn.classList.add('hidden');
+        checkBtn.textContent = '확인';
+        checkBtn.disabled = false;
+        
+        // 입력 필드 초기화 및 설정
+        quotientInput.value = '';
+        remainderInput.value = '';
+
+        if (state.chapter === 7) {
+            numericInputs.classList.add('hidden');
+            booleanQuestion.classList.remove('hidden');
+            checkBtn.classList.add('hidden');
+        } else {
+            numericInputs.classList.remove('hidden');
+            booleanQuestion.classList.add('hidden');
+            checkBtn.classList.remove('hidden');
+            
+            // 나머지가 없는 챕터 처리 (1, 2, 3, 4, 8)
+            const hasRemainder = q.remainder !== 0 || (state.chapter >= 5 && state.chapter !== 8);
+            if (hasRemainder) {
+                remainderGroup.classList.remove('hidden');
+            } else {
+                remainderGroup.classList.add('hidden');
+            }
+            quotientInput.focus();
+        }
+        
+        updateProgress();
+    }
+    
+    function handleAnswer() {
+        const currentQ = state.questions[state.currentQuestionIndex];
+        const userQuotient = parseInt(quotientInput.value);
+        const userRemainder = remainderGroup.classList.contains('hidden') ? 0 : (parseInt(remainderInput.value) || 0);
+
+        // 입력이 비어있다면 무시
+        if (isNaN(userQuotient)) {
+            feedback.textContent = '몫을 입력해 주세요!';
+            feedback.className = 'feedback-wrong';
+            setTimeout(() => { feedback.textContent = ''; feedback.className = ''; }, 1000);
+            return;
+        }
+
+        const isCorrect = userQuotient === currentQ.quotient && userRemainder === currentQ.remainder;
+        
+        processAnswer(isCorrect);
+    }
+    
+    function handleBooleanAnswer(userAnswer) {
+        const currentQ = state.questions[state.currentQuestionIndex];
+        const isCorrect = userAnswer === currentQ.isEquationCorrect;
+        
+        processAnswer(isCorrect);
+        document.querySelectorAll('.boolean-btn').forEach(btn => btn.disabled = true);
+    }
+    
+    function showCorrectAnswer() {
+        const q = state.questions[state.currentQuestionIndex];
+        showAnswerBtn.classList.add('hidden');
+        
+        // 정답 텍스트 생성
+        let answerText = "";
+        if(state.chapter === 7) {
+            answerText = `정답: '${q.isEquationCorrect ? '⭕ 맞아요' : '❌ 틀려요'}'`;
+        } else {
+            answerText = `정답: 몫 ${q.quotient}`;
+            if (!remainderGroup.classList.contains('hidden')) {
+                answerText += `, 나머지 ${q.remainder}`;
+            }
+        }
+        feedback.textContent = "✔ " + answerText;
+        feedback.className = 'feedback-correct';
+
+        // 다음 문제로 넘어감
+        setTimeout(() => {
+            state.currentQuestionIndex++;
+            displayQuestion();
+            document.querySelectorAll('.boolean-btn').forEach(btn => btn.disabled = false);
+        }, 1500);
+    }
+
+    function processAnswer(isCorrect) {
+        checkBtn.disabled = true; // 확인 버튼 비활성화
+
+        if (isCorrect) {
+            feedback.textContent = '딩동댕! 정답이에요! 🎉';
+            feedback.className = 'feedback-correct';
+            state.score++;
+            
+            // 정답인 경우 바로 다음 문제로 넘어감 (딜레이 1.5초)
+            setTimeout(() => {
+                state.currentQuestionIndex++;
+                displayQuestion();
+                document.querySelectorAll('.boolean-btn').forEach(btn => btn.disabled = false);
+            }, 1500);
+
+        } else {
+            feedback.textContent = '아쉬워요, 다시 생각해봐요! 😥';
+            feedback.className = 'feedback-wrong';
+            
+            if (state.mode === 'practice') {
+                // 연습 모드: 정답 보기 버튼 활성화
+                showAnswerBtn.classList.remove('hidden');
+            } else {
+                // 도전 모드: 오답이라도 1.5초 후 다음 문제로 넘어감
+                setTimeout(() => {
+                    state.currentQuestionIndex++;
+                    displayQuestion();
+                    document.querySelectorAll('.boolean-btn').forEach(btn => btn.disabled = false);
+                }, 1500);
+            }
+        }
+        
+        scoreDisplay.textContent = `점수: ${state.score}`;
+    }
+
+    function updateProgress() {
+        const progress = (state.currentQuestionIndex / state.totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function startTimer() {
+        timerDisplay.textContent = `시간: ${state.timer}`;
+        state.timerId = setInterval(() => {
+            state.timer--;
+            timerDisplay.textContent = `시간: ${state.timer}`;
+            if (state.timer <= 0) {
+                clearInterval(state.timerId);
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function endGame() {
+        if (state.timerId) clearInterval(state.timerId);
+        
+        gameScreen.classList.add('hidden');
+        resultsScreen.classList.remove('hidden');
+
+        finalScore.textContent = state.score;
+        
+        if (state.score === state.totalQuestions) {
+            resultsMessage.textContent = '🎉 완벽해요! 당신이 바로 나눗셈 왕! 👑';
+        } else if (state.score >= state.totalQuestions * 0.7) {
+            resultsMessage.textContent = '👍 정말 잘했어요! 조금만 더 힘내요!';
+        } else {
+            resultsMessage.textContent = '🤔 아쉬워요! 연습하면 더 잘할 수 있어요.';
+        }
+
+        if (state.mode === 'challenge') {
+            const timeTaken = 120 - state.timer;
+            finalTime.textContent = `걸린 시간: ${timeTaken}초`;
+            finalTime.classList.remove('hidden');
+        } else {
+            finalTime.classList.add('hidden');
+        }
+    }
+
+    function resetToMainMenu() {
+        // 모든 타이머 중지 및 화면 초기화
+        if (state.timerId) clearInterval(state.timerId);
+
+        gameScreen.classList.add('hidden');
+        resultsScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+        
+        state.chapter = null;
+        startBtn.disabled = true;
+        chapterBtns.forEach(b => b.classList.remove('selected'));
+    }
+
+    // --- 문제 생성 로직 (기존 유지) ---
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    function generateQuestions(chapter, count) {
+        const questions = new Set();
+        while (questions.size < count) {
+            let q;
+            switch(chapter) {
+                case 1: q = genCh1(); break;
+                case 2: q = genCh2(); break;
+                case 3: q = genCh3(); break;
+                case 4: q = genCh4(); break;
+                case 5: q = genCh5(); break;
+                case 6: q = genCh6(); break;
+                case 7: q = genCh7(); break;
+                case 8: q = genCh8(); break;
+                case 9: q = genCh9(); break;
+            }
+            questions.add(JSON.stringify(q));
+        }
+        return Array.from(questions).map(q => JSON.parse(q));
+    }
+
+    // 1. 내림 없는 (몇십) ÷ (몇) (예: 60 ÷ 3)
+    function genCh1() {
+        const divisor = randInt(2, 4);
+        const quotient_tens = randInt(1, 4);
+        const quotient = quotient_tens * 10;
+        const dividend = divisor * quotient;
+        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
+    }
+
+    // 2. 내림 없는 (몇십몇) ÷ (몇) (예: 69 ÷ 3)
+    function genCh2() {
+        const divisor = randInt(2, 4);
+        const quotient_tens = randInt(1, 4);
+        const quotient_ones = randInt(1, Math.floor(9 / divisor));
+        const quotient = quotient_tens * 10 + quotient_ones;
+        const dividend = divisor * quotient;
+        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
+    }
+    
+    // 3. 내림 있는 (몇십) ÷ (몇) (예: 70 ÷ 5)
+    function genCh3() {
+        const divisor = randInt(3, 8);
+        const quotient = randInt(11, 30);
+        const dividend = divisor * quotient;
+        if ( (Math.floor(dividend/10)) % divisor !== 0 && dividend % 10 === 0) {
+             return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
+        }
+        return genCh3();
+    }
+    
+    // 4. 내림 있는 (몇십몇) ÷ (몇) (예: 72 ÷ 3)
+    function genCh4() {
+        const divisor = randInt(3, 8);
+        const quotient = randInt(11, 30);
+        const dividend = divisor * quotient;
+        if ( (Math.floor(dividend/10)) % divisor !== 0 && dividend % 10 !== 0) {
+            return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
+        }
+        return genCh4();
+    }
+
+    // 5. 내림 없고 나머지 있는 (몇십몇) ÷ (몇) (예: 68 ÷ 3)
+    function genCh5() {
+        const divisor = randInt(2, 4);
+        const quotient_tens = randInt(1, 4);
+        const quotient_ones = randInt(0, Math.floor(9 / divisor));
+        const quotient = quotient_tens * 10 + quotient_ones;
+        const remainder = randInt(1, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        if ( (Math.floor(dividend/10)) % divisor === 0) {
+             return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder };
+        }
+        return genCh5();
+    }
+
+    // 6. 내림 있고 나머지 있는 (몇십몇) ÷ (몇) (예: 75 ÷ 4)
+    function genCh6() {
+        const divisor = randInt(3, 8);
+        const quotient = randInt(11, 30);
+        const remainder = randInt(1, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        if ( (Math.floor(dividend/10)) % divisor !== 0) {
+            return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder };
+        }
+        return genCh6();
+    }
+
+    // 7. 계산이 맞는지 확인하기
+    function genCh7() {
+        const divisor = randInt(3, 9);
+        const quotient = randInt(5, 20);
+        const remainder = randInt(0, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        
+        const isEquationCorrect = Math.random() > 0.4;
+        let displayedQuotient = quotient;
+        let displayedRemainder = remainder;
+
+        if (!isEquationCorrect) {
+            if (Math.random() > 0.5) { // 몫을 틀리게
+                displayedQuotient += randInt(1,3) * (Math.random() > 0.5 ? 1 : -1);
+                if (displayedQuotient < 0) displayedQuotient = 0;
+            } else { // 나머지를 틀리게
+                displayedRemainder = remainder;
+                while (displayedRemainder === remainder) {
+                    // 나머지가 0일 때는 나머지를 1~divisor-1로 틀리게 만듦
+                    if (remainder === 0) {
+                        displayedRemainder = randInt(1, divisor - 1);
+                    } else {
+                        // 나머지가 0이 아닐 때는 (0 또는 divisor 이상)으로 틀리게 만듦
+                        displayedRemainder = (Math.random() > 0.5) ? 0 : divisor; 
+                    }
+                }
+            }
+        }
+        
+        let remainderText = displayedRemainder > 0 ? `... ${displayedRemainder}` : '';
+        const text = `${dividend} &div; ${divisor} = ${displayedQuotient} ${remainderText}`;
+        return { text, isEquationCorrect };
+    }
+
+    // 8. (세 자리 수) ÷ (한 자리 수)
+    function genCh8() {
+        const divisor = randInt(2, 9);
+        const quotient = randInt(101, 300);
+        const dividend = divisor * quotient;
+        if(dividend > 999) return genCh8();
+        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder: 0 };
+    }
+
+    // 9. 나머지가 있는 (세 자리 수) ÷ (한 자리 수)
+    function genCh9() {
+        const divisor = randInt(2, 9);
+        const quotient = randInt(101, 300);
+        const remainder = randInt(1, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        if(dividend > 999) return genCh9();
+        return { text: `${dividend} &div; ${divisor}`, dividend, divisor, quotient, remainder };
+    }
+});
+</script>
+
+</body>
+</html>

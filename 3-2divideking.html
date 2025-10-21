@@ -736,32 +736,290 @@ document.addEventListener('DOMContentLoaded', () => {
         chapterBtns.forEach(b => b.classList.remove('selected'));
     }
 
-    // --- 문제 생성 로직 (기존과 동일) ---
+    // --- 문제 생성 로직 (재귀 제거 및 안전성 강화) ---
     const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    
     function generateQuestions(chapter, count) {
         const questions = new Set();
-        while (questions.size < count) {
+        const maxAttempts = count * 100; // 최대 시도 횟수 제한
+        let attempts = 0;
+        
+        while (questions.size < count && attempts < maxAttempts) {
+            attempts++;
             let q;
             switch(chapter) {
-                case 1: q = genCh1(); break; case 2: q = genCh2(); break;
-                case 3: q = genCh3(); break; case 4: q = genCh4(); break;
-                case 5: q = genCh5(); break; case 6: q = genCh6(); break;
-                case 7: q = genCh7(); break; case 8: q = genCh8(); break;
+                case 1: q = genCh1(); break; 
+                case 2: q = genCh2(); break;
+                case 3: q = genCh3(); break; 
+                case 4: q = genCh4(); break;
+                case 5: q = genCh5(); break; 
+                case 6: q = genCh6(); break;
+                case 7: q = genCh7(); break; 
+                case 8: q = genCh8(); break;
                 case 9: q = genCh9(); break;
             }
-            questions.add(JSON.stringify(q));
+            if (q) {
+                questions.add(JSON.stringify(q));
+            }
         }
-        return Array.from(questions).map(q => JSON.parse(q));
+        
+        // 충분한 문제가 생성되지 않았다면 중복을 허용
+        const result = Array.from(questions).map(q => JSON.parse(q));
+        while (result.length < count) {
+            result.push(result[result.length % result.length]);
+        }
+        
+        return result;
     }
-    function genCh1(){const t=randInt(2,4),e=10*randInt(1,4),n=t*e;return{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}}
-    function genCh2(){const t=randInt(2,4),e=10*randInt(1,4)+randInt(1,Math.floor(9/t)),n=t*e;return{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}}
-    function genCh3(){const t=randInt(3,8),e=randInt(11,30),n=t*e;return Math.floor(n/10)%t!=0&&n%10==0?{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}:genCh3()}
-    function genCh4(){const t=randInt(3,8),e=randInt(11,30),n=t*e;return Math.floor(n/10)%t!=0&&n%10!=0?{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}:genCh4()}
-    function genCh5(){const t=randInt(2,4),e=10*randInt(1,4)+randInt(0,Math.floor(9/t)),n=randInt(1,t-1),r=t*e+n;return Math.floor(r/10)%t==0?{text:`${r} &div; ${t}`,dividend:r,divisor:t,quotient:e,remainder:n}:genCh5()}
-    function genCh6(){const t=randInt(3,8),e=randInt(11,30),n=randInt(1,t-1),r=t*e+n;return Math.floor(r/10)%t!=0?{text:`${r} &div; ${t}`,dividend:r,divisor:t,quotient:e,remainder:n}:genCh6()}
-    function genCh7(){const t=randInt(3,9),e=randInt(5,20),n=randInt(0,t-1),r=t*e+n,a=Math.random()>.4;let i=e,d=n;if(!a)if(Math.random()>.5)(i+=randInt(1,3)*(Math.random()>.5?1:-1))<0&&(i=0);else for(;d===n;)d=0===n?randInt(1,t-1):Math.random()>.5?0:t;let o=d>0?`... ${d}`:"";return{text:`${r} &div; ${t} = ${i} ${o}`,isEquationCorrect:a}}
-    function genCh8(){const t=randInt(2,9),e=randInt(101,300),n=t*e;return n>999?genCh8():{text:`${n} &div; ${t}`,dividend:n,divisor:t,quotient:e,remainder:0}}
-    function genCh9(){const t=randInt(2,9),e=randInt(101,300),n=randInt(1,t-1),r=t*e+n;return r>999?genCh9():{text:`${r} &div; ${t}`,dividend:r,divisor:t,quotient:e,remainder:n}}
+    
+    function genCh1() {
+        const divisor = randInt(2, 4);
+        const quotient = 10 * randInt(1, 4);
+        const dividend = divisor * quotient;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: 0
+        };
+    }
+    
+    function genCh2() {
+        const divisor = randInt(2, 4);
+        const quotient = 10 * randInt(1, 4) + randInt(1, Math.floor(9 / divisor));
+        const dividend = divisor * quotient;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: 0
+        };
+    }
+    
+    function genCh3() {
+        const maxAttempts = 1000;
+        for (let i = 0; i < maxAttempts; i++) {
+            const divisor = randInt(3, 8);
+            const quotient = randInt(11, 30);
+            const dividend = divisor * quotient;
+            
+            // 십의 자리가 나누는 수로 나누어떨어지지 않고, 일의 자리는 0
+            if (Math.floor(dividend / 10) % divisor !== 0 && dividend % 10 === 0) {
+                return {
+                    text: `${dividend} &div; ${divisor}`,
+                    dividend: dividend,
+                    divisor: divisor,
+                    quotient: quotient,
+                    remainder: 0
+                };
+            }
+        }
+        // 실패 시 조건 완화
+        const divisor = randInt(3, 8);
+        const quotient = randInt(11, 30);
+        const dividend = divisor * quotient;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: 0
+        };
+    }
+    
+    function genCh4() {
+        const maxAttempts = 1000;
+        for (let i = 0; i < maxAttempts; i++) {
+            const divisor = randInt(3, 8);
+            const quotient = randInt(11, 30);
+            const dividend = divisor * quotient;
+            
+            // 십의 자리가 나누는 수로 나누어떨어지지 않고, 일의 자리도 0이 아님
+            if (Math.floor(dividend / 10) % divisor !== 0 && dividend % 10 !== 0) {
+                return {
+                    text: `${dividend} &div; ${divisor}`,
+                    dividend: dividend,
+                    divisor: divisor,
+                    quotient: quotient,
+                    remainder: 0
+                };
+            }
+        }
+        // 실패 시 조건 완화
+        const divisor = randInt(3, 8);
+        const quotient = randInt(11, 30);
+        const dividend = divisor * quotient;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: 0
+        };
+    }
+    
+    function genCh5() {
+        const maxAttempts = 1000;
+        for (let i = 0; i < maxAttempts; i++) {
+            const divisor = randInt(2, 4);
+            const quotient = 10 * randInt(1, 4) + randInt(0, Math.floor(9 / divisor));
+            const remainder = randInt(1, divisor - 1);
+            const dividend = divisor * quotient + remainder;
+            
+            // 십의 자리가 나누는 수로 나누어떨어짐
+            if (Math.floor(dividend / 10) % divisor === 0) {
+                return {
+                    text: `${dividend} &div; ${divisor}`,
+                    dividend: dividend,
+                    divisor: divisor,
+                    quotient: quotient,
+                    remainder: remainder
+                };
+            }
+        }
+        // 실패 시 조건 완화
+        const divisor = randInt(2, 4);
+        const quotient = 10 * randInt(1, 4) + randInt(0, Math.floor(9 / divisor));
+        const remainder = randInt(1, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: remainder
+        };
+    }
+    
+    function genCh6() {
+        const maxAttempts = 1000;
+        for (let i = 0; i < maxAttempts; i++) {
+            const divisor = randInt(3, 8);
+            const quotient = randInt(11, 30);
+            const remainder = randInt(1, divisor - 1);
+            const dividend = divisor * quotient + remainder;
+            
+            // 십의 자리가 나누는 수로 나누어떨어지지 않음
+            if (Math.floor(dividend / 10) % divisor !== 0) {
+                return {
+                    text: `${dividend} &div; ${divisor}`,
+                    dividend: dividend,
+                    divisor: divisor,
+                    quotient: quotient,
+                    remainder: remainder
+                };
+            }
+        }
+        // 실패 시 조건 완화
+        const divisor = randInt(3, 8);
+        const quotient = randInt(11, 30);
+        const remainder = randInt(1, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: remainder
+        };
+    }
+    
+    function genCh7() {
+        const divisor = randInt(3, 9);
+        const quotient = randInt(5, 20);
+        const remainder = randInt(0, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        const isCorrect = Math.random() > 0.4;
+        
+        let displayQuotient = quotient;
+        let displayRemainder = remainder;
+        
+        if (!isCorrect) {
+            if (Math.random() > 0.5) {
+                // 몫 틀리게
+                displayQuotient += randInt(1, 3) * (Math.random() > 0.5 ? 1 : -1);
+                if (displayQuotient < 0) displayQuotient = 0;
+            } else {
+                // 나머지 틀리게 (최대 20번 시도)
+                let attempts = 0;
+                while (displayRemainder === remainder && attempts < 20) {
+                    attempts++;
+                    displayRemainder = remainder === 0 ? randInt(1, divisor - 1) : 
+                                      (Math.random() > 0.5 ? 0 : randInt(0, divisor));
+                }
+            }
+        }
+        
+        let remainderText = displayRemainder > 0 ? `... ${displayRemainder}` : "";
+        return {
+            text: `${dividend} &div; ${divisor} = ${displayQuotient} ${remainderText}`,
+            isEquationCorrect: isCorrect
+        };
+    }
+    
+    function genCh8() {
+        const maxAttempts = 1000;
+        for (let i = 0; i < maxAttempts; i++) {
+            const divisor = randInt(2, 9);
+            const quotient = randInt(101, 300);
+            const dividend = divisor * quotient;
+            
+            if (dividend <= 999) {
+                return {
+                    text: `${dividend} &div; ${divisor}`,
+                    dividend: dividend,
+                    divisor: divisor,
+                    quotient: quotient,
+                    remainder: 0
+                };
+            }
+        }
+        // 실패 시 범위 조정
+        const divisor = randInt(2, 9);
+        const quotient = randInt(101, Math.floor(999 / divisor));
+        const dividend = divisor * quotient;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: 0
+        };
+    }
+    
+    function genCh9() {
+        const maxAttempts = 1000;
+        for (let i = 0; i < maxAttempts; i++) {
+            const divisor = randInt(2, 9);
+            const quotient = randInt(101, 300);
+            const remainder = randInt(1, divisor - 1);
+            const dividend = divisor * quotient + remainder;
+            
+            if (dividend <= 999) {
+                return {
+                    text: `${dividend} &div; ${divisor}`,
+                    dividend: dividend,
+                    divisor: divisor,
+                    quotient: quotient,
+                    remainder: remainder
+                };
+            }
+        }
+        // 실패 시 범위 조정
+        const divisor = randInt(2, 9);
+        const quotient = randInt(101, Math.floor(999 / divisor));
+        const remainder = randInt(1, divisor - 1);
+        const dividend = divisor * quotient + remainder;
+        return {
+            text: `${dividend} &div; ${divisor}`,
+            dividend: dividend,
+            divisor: divisor,
+            quotient: quotient,
+            remainder: remainder
+        };
+    }
 });
 </script>
 

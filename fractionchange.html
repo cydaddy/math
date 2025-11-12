@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>분수 몬스터와 함께하는 분수 변환 놀이터! (최종)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #f0f8ff;
+            --main-color: #4a90e2;
+            --accent-color: #f5a623;
+            --time-attack-color: #e94560;
+            --correct-color: #7ed321;
+            --wrong-color: #d0021b;
+            --card-bg: #ffffff;
+            --font-family: 'Gaegu', cursive;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        h1 { color: var(--main-color); font-size: 2.8em; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        .monster-container { position: relative; width: 150px; height: 120px; margin: 10px auto; }
+        .monster { width: 100px; height: 100px; background: var(--accent-color); border-radius: 50% 50% 40% 40%; position: absolute; bottom: 0; left: 25px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .monster-face { position: absolute; width: 100%; height: 100%; }
+        .eye { position: absolute; width: 25px; height: 25px; background: white; border-radius: 50%; top: 30px; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); }
+        .eye.left { left: 20px; } .eye.right { right: 20px; }
+        .pupil { width: 10px; height: 10px; background: #333; border-radius: 50%; position: absolute; top: 8px; left: 8px; }
+        .mouth { position: absolute; width: 50px; height: 25px; border: 4px solid #333; border-color: transparent transparent #333 transparent; border-radius: 0 0 25px 25px; bottom: 20px; left: 25px; transition: all 0.3s ease; }
+        .monster.happy .mouth { width: 50px; height: 25px; border-radius: 0 0 25px 25px; border-color: transparent transparent #333 transparent; }
+        .monster.sad .mouth { width: 40px; height: 20px; border-radius: 20px 20px 0 0; border-color: #333 transparent transparent transparent; bottom: 25px; left: 30px; }
+        .speech-bubble { position: absolute; background: white; padding: 10px 15px; border-radius: 15px; font-size: 1.2em; bottom: 110px; left: 50%; transform: translateX(-50%); white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .speech-bubble.show { opacity: 1; visibility: visible; }
+
+        .mode-selector { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+        .mode-btn { padding: 12px 25px; font-size: 1.3em; font-family: var(--font-family); border-radius: 20px; border: 2px solid #ccc; cursor: pointer; background-color: #fff; color: #555; transition: all 0.2s; }
+        .mode-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .mode-btn.active { color: white; border-color: transparent; }
+        .mode-btn[data-mode="m-to-i"].active { background-color: var(--main-color); }
+        .mode-btn[data-mode="i-to-m"].active { background-color: var(--accent-color); }
+        .mode-btn[data-mode="time-attack"].active { background-color: var(--time-attack-color); }
+
+        .card { background-color: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); padding: 25px; width: 450px; text-align: center; transition: transform 0.2s, opacity 0.3s; border-top: 10px solid; }
+        .hidden { display: none !important; }
+        #m-to-i-card { border-top-color: var(--main-color); }
+        #i-to-m-card { border-top-color: var(--accent-color); }
+        #time-attack-card { border-top-color: var(--time-attack-color); }
+
+        h2 { font-size: 2em; margin-top: 0; margin-bottom: 30px; }
+
+        .problem-display { display: flex; align-items: center; justify-content: center; margin: 20px 0; font-size: 3.5em; min-height: 120px; }
+        .fraction { display: inline-flex; flex-direction: column; text-align: center; margin: 0 10px; }
+        .numerator { padding-bottom: 5px; }
+        .denominator { border-top: 4px solid #333; padding-top: 5px; }
+        .equals { font-size: 2.5em; margin: 0 15px; color: #888; }
+        .answer-group { display: flex; align-items: center; justify-content: center; }
+
+        .answer-input {
+            width: 110px;
+            height: 80px;
+            font-size: 1em; /* Inherits size from parent .problem-display */
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-family: var(--font-family);
+            margin: 0 5px;
+            box-sizing: border-box;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 40%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23cccccc' d='M14.25,19.5H9.75V17.25H14.25V19.5M15.38,15L14.25,16.13C13.5,16.88 12.75,17.25 12,17.25C11.25,17.25 10.5,16.88 9.75,16.13L8.63,15C9.38,14.25 10.13,13.88 10.88,13.5V11.25H9.75V9.75H12V13.5C12.75,13.88 13.5,14.25 14.25,15L15.38,15M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z'/%3E%3C/svg%3E");
+            -moz-appearance: textfield; /* Firefox */
+        }
+        .answer-input::-webkit-outer-spin-button,
+        .answer-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .answer-input::placeholder { color: transparent; }
+        .answer-input:focus { border-color: var(--main-color); outline: none; box-shadow: 0 0 10px rgba(74, 144, 226, 0.5); background-image: none; }
+        .answer-input:not(:placeholder-shown) { background-image: none; }
+        
+        .button-group { margin-top: 25px; display: flex; gap: 15px; justify-content: center; }
+        .btn { padding: 15px 25px; font-size: 1.4em; font-family: var(--font-family); border-radius: 15px; border: none; cursor: pointer; color: white; font-weight: 700; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .check-btn { background-color: var(--main-color); }
+        .check-btn:hover { background-color: #3a7ac8; }
+        .new-btn { background-color: var(--accent-color); }
+        .new-btn:hover { background-color: #d9901e; }
+        .show-ans-btn { background-color: #9b9b9b; }
+        .show-ans-btn:hover { background-color: #888; }
+        .show-ans-btn:disabled { background-color: #e0e0e0; cursor: not-allowed; opacity: 0.7; }
+
+        .feedback { margin-top: 20px; font-size: 1.8em; font-weight: 700; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease-in-out; }
+        .feedback.correct { color: var(--correct-color); }
+        .feedback.wrong { color: var(--wrong-color); }
+        
+        #time-attack-card .status-bar { display: flex; justify-content: space-around; font-size: 1.8em; font-weight: 700; margin-bottom: 20px; }
+        #time-attack-card #timer { color: var(--time-attack-color); }
+        #time-attack-card #ta-score { color: var(--main-color); }
+        #time-attack-card .result-screen { font-size: 2.5em; padding: 50px 0; }
+        #time-attack-card .result-screen h3 { margin: 0; font-size: 1.2em; }
+        #time-attack-card .result-screen p { margin: 10px 0; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>분수 변환 놀이터</h1>
+        <div class="monster-container">
+            <div class="monster" id="monster"><div class="monster-face"><div class="eye left"><div class="pupil"></div></div><div class="eye right"><div class="pupil"></div></div><div class="mouth"></div></div></div>
+            <div class="speech-bubble" id="speechBubble">어떤 걸 연습해볼까?</div>
+        </div>
+    </div>
+
+    <div class="mode-selector">
+        <button class="mode-btn active" data-mode="m-to-i">대분수 → 가분수</button>
+        <button class="mode-btn" data-mode="i-to-m">가분수 → 대분수</button>
+        <button class="mode-btn" data-mode="time-attack">🔥 2분 타임어택!</button>
+    </div>
+
+    <div class="main-container">
+        <!-- 대분수 -> 가분수 -->
+        <div class="card" id="m-to-i-card">
+            <h2>대분수를 가분수로!</h2>
+            <div class="problem-display"><span id="m_whole"></span><div class="fraction"><span class="numerator" id="m_num"></span><span class="denominator" id="m_den"></span></div><span class="equals">=</span><div class="answer-group"><div class="fraction"><input type="number" class="answer-input" id="m_ans_num" placeholder=" "><span class="denominator" id="m_ans_den"></span></div></div></div>
+            <div class="button-group"><button class="btn check-btn" id="m_check_btn">정답 확인</button><button class="btn new-btn" id="m_new_btn">새 문제</button><button class="btn show-ans-btn" id="m_show_ans_btn" disabled>정답 보기</button></div><div class="feedback" id="m_feedback"></div>
+        </div>
+
+        <!-- 가분수 -> 대분수 -->
+        <div class="card hidden" id="i-to-m-card">
+            <h2>가분수를 대분수로!</h2>
+            <div class="problem-display"><div class="fraction"><span class="numerator" id="i_num"></span><span class="denominator" id="i_den"></span></div><span class="equals">=</span><div class="answer-group"><input type="number" class="answer-input" id="i_ans_whole" placeholder=" "><div class="fraction"><input type="number" class="answer-input" id="i_ans_num" placeholder=" "><span class="denominator" id="i_ans_den"></span></div></div></div>
+            <div class="button-group"><button class="btn check-btn" id="i_check_btn">정답 확인</button><button class="btn new-btn" id="i_new_btn">새 문제</button><button class="btn show-ans-btn" id="i_show_ans_btn" disabled>정답 보기</button></div><div class="feedback" id="i_feedback"></div>
+        </div>
+
+        <!-- 타임 어택 -->
+        <div class="card hidden" id="time-attack-card">
+            <h2>🔥 2분 타임어택!</h2>
+            <div class="game-screen">
+                <div class="status-bar"><div id="timer">남은 시간: 2:00</div><div id="ta-score">맞힌 개수: 0개</div></div>
+                <div class="problem-display" id="ta_problem_display"></div>
+                <div class="button-group"><button class="btn check-btn" id="ta_check_btn" style="background-color: var(--time-attack-color);">정답 확인!</button></div>
+            </div>
+            <div class="result-screen hidden"><h3>⏰ 시간 끝!</h3><p id="final-score"></p><button class="btn new-btn" id="restart_btn">다시 도전!</button></div>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const monster = document.getElementById('monster');
+        const speechBubble = document.getElementById('speechBubble');
+        
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const cards = {
+            'm-to-i': document.getElementById('m-to-i-card'),
+            'i-to-m': document.getElementById('i-to-m-card'),
+            'time-attack': document.getElementById('time-attack-card')
+        };
+        modeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                stopTimeAttack();
+                const selectedMode = button.dataset.mode;
+                modeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                for (const mode in cards) { cards[mode].classList.toggle('hidden', mode !== selectedMode); }
+                if (selectedMode === 'time-attack') startTimeAttack();
+                else if (selectedMode === 'm-to-i') generateMixedProblem();
+                else if (selectedMode === 'i-to-m') generateImproperProblem();
+            });
+        });
+
+        // --- Mixed to Improper (대분수 -> 가분수) ---
+        const m_whole = document.getElementById('m_whole'), m_num = document.getElementById('m_num'), m_den = document.getElementById('m_den');
+        const m_ans_num = document.getElementById('m_ans_num'), m_ans_den = document.getElementById('m_ans_den');
+        const m_check_btn = document.getElementById('m_check_btn'), m_new_btn = document.getElementById('m_new_btn'), m_show_ans_btn = document.getElementById('m_show_ans_btn');
+        const m_feedback = document.getElementById('m_feedback');
+        let m_currentProblem = {};
+
+        function generateMixedProblem() {
+            const den = Math.floor(Math.random() * 8) + 2;
+            const whole = Math.floor(Math.random() * 9) + 1;
+            const num = Math.floor(Math.random() * (den - 1)) + 1;
+            m_currentProblem = { whole, num, den };
+            m_whole.textContent = whole; m_num.textContent = num; m_den.textContent = den;
+            m_ans_den.textContent = den;
+            m_ans_num.value = '';
+            m_feedback.textContent = ''; m_feedback.className = 'feedback';
+            m_show_ans_btn.disabled = true;
+            m_ans_num.placeholder = ' ';
+        }
+
+        function checkMixedAnswer() {
+            if (m_ans_num.value === '') { showMonsterMessage("답을 입력해 줘!"); return; }
+            const userAnswerNum = parseInt(m_ans_num.value, 10);
+            const { whole, num, den } = m_currentProblem;
+            const correctAnswerNum = whole * den + num;
+            if (userAnswerNum === correctAnswerNum) {
+                m_feedback.textContent = '🎉 우와, 정답이야! 최고!'; m_feedback.classList.add('correct');
+                setMonsterState('happy', '정말 대단해!');
+                setTimeout(generateMixedProblem, 1500);
+            } else {
+                m_feedback.textContent = `😥 아쉬워! 다시 한번 풀어볼까?`; m_feedback.classList.add('wrong');
+                setMonsterState('sad', '다시 해볼까?');
+                m_show_ans_btn.disabled = false;
+            }
+        }
+        
+        m_show_ans_btn.addEventListener('click', () => {
+            const { whole, num, den } = m_currentProblem;
+            const correctAnswerNum = whole * den + num;
+            m_feedback.textContent = `정답은 ${correctAnswerNum} / ${den} 였어!`;
+        });
+
+        // --- Improper to Mixed (가분수 -> 대분수) ---
+        const i_num = document.getElementById('i_num'), i_den = document.getElementById('i_den');
+        const i_ans_whole = document.getElementById('i_ans_whole'), i_ans_num = document.getElementById('i_ans_num'), i_ans_den = document.getElementById('i_ans_den');
+        const i_check_btn = document.getElementById('i_check_btn'), i_new_btn = document.getElementById('i_new_btn'), i_show_ans_btn = document.getElementById('i_show_ans_btn');
+        const i_feedback = document.getElementById('i_feedback');
+        let i_currentProblem = {};
+
+        function generateImproperProblem() {
+            const den = Math.floor(Math.random() * 8) + 2;
+            let num;
+            do { num = Math.floor(Math.random() * 20) + den + 1; } while (num % den === 0);
+            i_currentProblem = { num, den };
+            i_num.textContent = num; i_den.textContent = den;
+            i_ans_den.textContent = den;
+            i_ans_whole.value = ''; i_ans_num.value = '';
+            i_feedback.textContent = ''; i_feedback.className = 'feedback';
+            i_show_ans_btn.disabled = true;
+            i_ans_whole.placeholder = ' '; i_ans_num.placeholder = ' ';
+        }
+
+        function checkImproperAnswer() {
+            if (i_ans_whole.value === '' || i_ans_num.value === '') { showMonsterMessage("답을 모두 입력해 줘!"); return; }
+            const userWhole = parseInt(i_ans_whole.value, 10);
+            const userNum = parseInt(i_ans_num.value, 10);
+            const { num, den } = i_currentProblem;
+            const correctWhole = Math.floor(num / den);
+            const correctNum = num % den;
+            if (userWhole === correctWhole && userNum === correctNum) {
+                i_feedback.textContent = '🌟 정답! 정말 잘하는데?'; i_feedback.classList.add('correct');
+                setMonsterState('happy', '분수 박사님인데!');
+                setTimeout(generateImproperProblem, 1500);
+            } else {
+                i_feedback.textContent = `😥 아까비! 조금만 더 생각해보자!`; i_feedback.classList.add('wrong');
+                setMonsterState('sad', '조금만 더 생각해보자!');
+                i_show_ans_btn.disabled = false;
+            }
+        }
+
+        i_show_ans_btn.addEventListener('click', () => {
+            const { num, den } = i_currentProblem;
+            const correctWhole = Math.floor(num / den);
+            const correctNum = num % den;
+            i_feedback.textContent = `정답은 ${correctWhole}와 ${correctNum}/${den} 였어.`;
+        });
+
+        // --- Time Attack Logic ---
+        const ta_card = document.getElementById('time-attack-card'), timerEl = document.getElementById('timer'), ta_scoreEl = document.getElementById('ta-score');
+        const ta_problem_display = document.getElementById('ta_problem_display'), ta_check_btn = document.getElementById('ta_check_btn');
+        const game_screen = ta_card.querySelector('.game-screen'), result_screen = ta_card.querySelector('.result-screen');
+        const final_scoreEl = document.getElementById('final-score'), restart_btn = document.getElementById('restart_btn');
+        let ta_score = 0, timerInterval, timeLeft = 120, current_ta_problem = {};
+
+        function startTimeAttack() {
+            game_screen.classList.remove('hidden'); result_screen.classList.add('hidden');
+            ta_score = 0; timeLeft = 120;
+            updateTAScore(); updateTimerDisplay();
+            setMonsterState('happy', '도전! 시작!');
+            timerInterval = setInterval(() => {
+                timeLeft--; updateTimerDisplay();
+                if (timeLeft <= 0) stopTimeAttack(true);
+            }, 1000);
+            generateTAProblem();
+        }
+
+        function stopTimeAttack(finished = false) {
+            clearInterval(timerInterval);
+            if (finished) {
+                game_screen.classList.add('hidden'); result_screen.classList.remove('hidden');
+                final_scoreEl.textContent = `결과: ${ta_score}개 맞혔어!`;
+                setMonsterState('happy', '정말 멋진 기록이야!');
+            }
+        }
+        function updateTimerDisplay() { timerEl.textContent = `남은 시간: ${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`; }
+        function updateTAScore() { ta_scoreEl.textContent = `맞힌 개수: ${ta_score}개`; }
+
+        function generateTAProblem() {
+            ta_problem_display.innerHTML = '';
+            const problemType = Math.random() < 0.5 ? 'm-to-i' : 'i-to-m';
+            if (problemType === 'm-to-i') {
+                const den = Math.floor(Math.random() * 8) + 2; const whole = Math.floor(Math.random() * 9) + 1; const num = Math.floor(Math.random() * (den - 1)) + 1;
+                current_ta_problem = { type: 'm-to-i', answerNum: whole * den + num };
+                ta_problem_display.innerHTML = `<span>${whole}</span><div class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></div><span class="equals">=</span><div class="answer-group"><div class="fraction"><input type="number" class="answer-input" id="ta_ans_num" placeholder=" "><span class="denominator">${den}</span></div></div>`;
+                document.getElementById('ta_ans_num').focus();
+            } else {
+                const den = Math.floor(Math.random() * 8) + 2; let num; do { num = Math.floor(Math.random() * 20) + den + 1; } while (num % den === 0);
+                current_ta_problem = { type: 'i-to-m', answerWhole: Math.floor(num / den), answerNum: num % den };
+                ta_problem_display.innerHTML = `<div class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></div><span class="equals">=</span><div class="answer-group"><input type="number" class="answer-input" id="ta_ans_whole" placeholder=" "><div class="fraction"><input type="number" class="answer-input" id="ta_ans_num" placeholder=" "><span class="denominator">${den}</span></div></div>`;
+                document.getElementById('ta_ans_whole').focus();
+            }
+            ta_problem_display.querySelectorAll('.answer-input').forEach(input => input.addEventListener('keydown', e => e.key === 'Enter' && checkTAAnswer()));
+        }
+
+        function checkTAAnswer() {
+            let isCorrect = false;
+            if (current_ta_problem.type === 'm-to-i') {
+                const numInput = document.getElementById('ta_ans_num');
+                if (numInput.value === '') return;
+                isCorrect = parseInt(numInput.value) === current_ta_problem.answerNum;
+            } else {
+                const wholeInput = document.getElementById('ta_ans_whole'), numInput = document.getElementById('ta_ans_num');
+                if (wholeInput.value === '' || numInput.value === '') return;
+                isCorrect = parseInt(wholeInput.value) === current_ta_problem.answerWhole && parseInt(numInput.value) === current_ta_problem.answerNum;
+            }
+            if(isCorrect) { ta_score++; setMonsterState('happy', '좋아!'); } else { setMonsterState('sad', '앗!'); }
+            updateTAScore();
+            generateTAProblem();
+        }
+
+        function setMonsterState(state, message) { monster.className = 'monster ' + state; showMonsterMessage(message); }
+        let bubbleTimeout;
+        function showMonsterMessage(message) { clearTimeout(bubbleTimeout); speechBubble.textContent = message; speechBubble.classList.add('show'); bubbleTimeout = setTimeout(() => speechBubble.classList.remove('show'), 1500); }
+
+        m_check_btn.addEventListener('click', checkMixedAnswer);
+        m_new_btn.addEventListener('click', generateMixedProblem);
+        m_ans_num.addEventListener('keydown', e => e.key === 'Enter' && checkMixedAnswer());
+
+        i_check_btn.addEventListener('click', checkImproperAnswer);
+        i_new_btn.addEventListener('click', generateImproperProblem);
+        i_ans_num.addEventListener('keydown', e => e.key === 'Enter' && checkImproperAnswer());
+        
+        ta_check_btn.addEventListener('click', checkTAAnswer);
+        restart_btn.addEventListener('click', startTimeAttack);
+
+        generateMixedProblem();
+        generateImproperProblem();
+    });
+    </script>
+</body>
+</html>

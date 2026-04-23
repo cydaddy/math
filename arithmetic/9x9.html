@@ -2,398 +2,932 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>신나는 구구단 연습!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>업그레이드: 신나는 구구단!</title>
+    <!-- Use a fun Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
     <style>
-        /* CSS는 변경 사항 없음 */
+        :root {
+            --primary: #4A90E2;
+            --secondary: #50E3C2;
+            --danger: #FF6B6B;
+            --success: #20C997;
+            --bg: #F0F4F8;
+            --card-bg: #FFFFFF;
+            --text-dark: #333333;
+            --text-light: #777777;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none; /* Disable text selection for touch */
+            touch-action: manipulation; /* Reduce click delay */
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Jua', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f0f8ff;
-            text-align: center;
-            flex-direction: column;
+            color: var(--text-dark);
+            overflow: hidden; /* Prevent scrolling bounce */
         }
-        .container {
-            background-color: #ffffff;
-            padding: 30px 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            min-width: 380px;
-        }
-        h1 {
-            color: #0056b3;
-            margin-bottom: 20px;
-        }
-        .dan-selector {
-            margin-bottom: 5px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        .dan-selector-grid {
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            max-height: 900px;
+            background: var(--card-bg);
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px 15px;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            position: relative;
         }
-        .dan-option {
+
+        @media (min-height: 800px) and (min-width: 500px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 20px;
+                overflow: hidden;
+            }
+        }
+
+        .header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, var(--primary), #8E2DE2);
+            color: white;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .settings-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            font-size: 1rem;
+        }
+        
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-family: inherit;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: 0.2s;
             display: flex;
             align-items: center;
+            gap: 5px;
         }
-        .dan-option label {
-            margin-left: 5px;
-            cursor: pointer;
+        .settings-btn:hover, .settings-btn:active {
+            background: rgba(74, 144, 226, 0.1);
         }
-        .dan-option input[type="checkbox"] {
-            cursor: pointer;
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 20px;
+            background: white;
+            z-index: 5;
         }
-        #selectAllOption label {
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .score-item:first-child {
+            border-right: 1px solid #eee;
+        }
+
+        .score-title {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.8rem;
+            color: var(--primary);
             font-weight: bold;
-            color: #0056b3;
+            transition: transform 0.2s;
         }
-        .info-text {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 20px;
+
+        .score-value.pop {
+            transform: scale(1.4);
+            color: var(--secondary);
         }
-        #problem {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            color: #333;
-            font-weight: bold;
+        .score-value.shake {
+            color: var(--danger);
         }
-        input[type="number"] {
-            padding: 15px;
-            font-size: 1.5em;
-            width: 100px;
+
+        .problem-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: var(--bg);
+        }
+
+        .equation {
+            font-size: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 350px) {
+            .equation {
+                font-size: 3rem;
+                gap: 10px;
+            }
+        }
+
+        .num {
+            min-width: 50px;
             text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            -moz-appearance: textfield;
         }
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+
+        .unknown-box {
+            min-width: 80px;
+            height: 90px;
+            border: 4px dashed var(--primary);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary);
+            background: #fff;
+            transition: all 0.2s;
+            padding: 0 10px;
+            font-size: 3.5rem;
+            cursor: pointer;
         }
-        .button-group {
-            margin-top: 10px;
+
+        .unknown-box.active {
+            border-style: solid;
+            background: #e1f0ff;
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.4);
+            transform: scale(1.05);
+        }
+
+        .unknown-box.correct {
+            border-color: var(--success);
+            color: var(--success);
+            background: #e6f9f0;
+            border-style: solid;
+            transform: scale(1.1);
+        }
+        
+        .unknown-box.empty {
+            color: #aaccee;
+        }
+
+        .equation.incorrect {
+            animation: shake 0.5s ease-in-out;
+        }
+        .equation.incorrect .unknown-box {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: #ffebe6;
+            border-style: solid;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-15px); }
+            40% { transform: translateX(15px); }
+            60% { transform: translateX(-15px); }
+            80% { transform: translateX(15px); }
+        }
+
+        .feedback-msg {
+            height: 40px;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(10px);
+            padding: 5px 20px;
+            border-radius: 20px;
+        }
+        
+        .feedback-msg.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback-msg.correct {
+            background: rgba(32, 201, 151, 0.1);
+            color: var(--success);
+        }
+
+        .feedback-msg.incorrect {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--danger);
+        }
+
+        .keypad {
+            padding: 20px;
+            background: #ffffff;
+            border-top: 1px solid #eee;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        .key-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .key {
+            flex: 1;
+            padding: 20px 0;
+            font-size: 2rem;
+            font-family: inherit;
+            border: none;
+            border-radius: 20px;
+            background: #f8f9fa;
+            color: #333;
+            box-shadow: 0 4px 0px #e9ecef, 0 5px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .key:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #e9ecef, 0 1px 2px rgba(0,0,0,0.1);
+            background: #e2e6ea;
+        }
+
+        .key.action {
+            background: #e9ecef;
+            color: #495057;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 0px #dee2e6, 0 5px 5px rgba(0,0,0,0.05);
+        }
+
+        .key.action:active {
+            box-shadow: 0 0px 0px #dee2e6, 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .key.enter {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 0px #357ABD, 0 5px 5px rgba(0,0,0,0.1);
+        }
+        .key.enter:active {
+            background: #3a7bc8;
+            box-shadow: 0 0px 0px #357ABD, 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Modal Settings */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: white;
+            padding: 25px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90%;
+            overflow-y: auto;
+        }
+        .modal-overlay.active .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .setting-group {
             margin-bottom: 20px;
         }
-        button {
-            padding: 12px 20px;
-            font-size: 1.1em;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            margin: 5px;
-            transition: background-color 0.3s ease, opacity 0.3s ease;
-            min-width: 100px;
-        }
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        #checkBtn {
-            background-color: #28a745;
-            color: white;
-        }
-        #checkBtn:hover:not(:disabled) {
-            background-color: #218838;
-        }
-        #showAnswerBtn {
-            background-color: #ffc107;
-            color: #333;
-        }
-        #showAnswerBtn:hover:not(:disabled) {
-            background-color: #e0a800;
-        }
-         #nextBtn {
-            background-color: #007bff;
-            color: white;
-        }
-        #nextBtn:hover:not(:disabled) {
-            background-color: #0056b3;
-        }
-        #feedback {
-            margin-top: 20px;
-            font-size: 1.3em;
-            font-weight: bold;
-            min-height: 30px;
+        .setting-group h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
             color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .correct {
-            color: green;
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
         }
-        .incorrect {
-            color: red;
+
+        .dan-btn {
+            padding: 12px 0;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: white;
+            font-family: inherit;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #6c757d;
         }
-        .corrected {
-            color: darkorange;
+
+        .dan-btn.active {
+            border-color: var(--secondary);
+            background: rgba(80, 227, 194, 0.15);
+            color: #20c997;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(32, 201, 151, 0.2);
         }
-        #score-area {
-             margin-top: 15px;
-             font-size: 1.1em;
-             color: #555;
+
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
-        #score-area div {
-             margin-bottom: 5px;
+
+        .toggle-btn {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            background: white;
+            font-family: inherit;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #6c757d;
         }
+
+        .toggle-btn.active {
+            border-color: var(--primary);
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary);
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+        }
+
+        .close-modal-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+            transition: transform 0.1s;
+        }
+        
+        .close-modal-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 50;
+            animation: fall 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(150px) scale(0); opacity: 0; }
+        }
+        
+        #hidden-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>신나는 구구단 연습! 🎉</h1>
-
-    <div class="dan-selector">
-        <div class="dan-selector-grid">
-            <div class="dan-option" id="selectAllOption">
-                <input type="checkbox" id="selectAll">
-                <label for="selectAll">전체 선택</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan2" value="2" class="dan-checkbox">
-                <label for="dan2">2단</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan3" value="3" class="dan-checkbox">
-                <label for="dan3">3단</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan4" value="4" class="dan-checkbox">
-                <label for="dan4">4단</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan5" value="5" class="dan-checkbox">
-                <label for="dan5">5단</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan6" value="6" class="dan-checkbox">
-                <label for="dan6">6단</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan7" value="7" class="dan-checkbox">
-                <label for="dan7">7단</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan8" value="8" class="dan-checkbox">
-                <label for="dan8">8단</label>
-            </div>
-            <div class="dan-option">
-                <input type="checkbox" id="dan9" value="9" class="dan-checkbox">
-                <label for="dan9">9단</label>
-            </div>
+<div class="app-container">
+    <div class="header">
+        <h1>✨ 신나는 구구단 ✨</h1>
+    </div>
+    
+    <div class="settings-bar">
+        <span id="current-mode-status">전체 단 · 기본 문제 모드</span>
+        <button class="settings-btn" id="btn-settings">
+            <span>⚙️</span> 설정
+        </button>
+    </div>
+    
+    <div class="score-board">
+        <div class="score-item">
+            <span class="score-title">정답 수 🎯</span>
+            <span class="score-value" id="score-correct">0</span>
+        </div>
+        <div class="score-item">
+            <span class="score-title">연속 정답 🔥</span>
+            <span class="score-value" id="score-combo">0</span>
         </div>
     </div>
-
-    <div class="info-text">ℹ️ 단을 바꾸면 푼 문제 수와 정답 관련 점수가 초기화됩니다.</div>
-
-    <div id="problem">? x ? = ?</div>
-
-    <input type="number" id="answer" placeholder="정답 입력" autofocus>
-
-    <div class="button-group">
-        <button id="checkBtn">확인</button>
-        <button id="showAnswerBtn" disabled>정답 보기</button>
-        <button id="nextBtn" disabled>다음 문제</button>
+    
+    <div class="problem-area" id="problem-area">
+        <div class="equation" id="equation">
+            <!-- Dynamic elements go here -->
+        </div>
+        <div class="feedback-msg" id="feedback"></div>
     </div>
-
-    <div id="feedback">연습할 단을 선택하고 문제를 풀어보세요!</div>
-
-    <div id="score-area">
-        <div id="problemsSolved">푼 문제: 0</div>
-        <div id="correctAnswers">정답 (첫 시도): 0</div>
-        <div id="correctionScore">오답 수정: 0번 👍</div>
+    
+    <div class="keypad">
+        <div class="key-row">
+            <button class="key num-key" data-val="1">1</button>
+            <button class="key num-key" data-val="2">2</button>
+            <button class="key num-key" data-val="3">3</button>
+        </div>
+        <div class="key-row">
+            <button class="key num-key" data-val="4">4</button>
+            <button class="key num-key" data-val="5">5</button>
+            <button class="key num-key" data-val="6">6</button>
+        </div>
+        <div class="key-row">
+            <button class="key num-key" data-val="7">7</button>
+            <button class="key num-key" data-val="8">8</button>
+            <button class="key num-key" data-val="9">9</button>
+        </div>
+        <div class="key-row">
+            <button class="key action del-key">⌫</button>
+            <button class="key num-key" data-val="0">0</button>
+            <button class="key enter enter-key">확인</button>
+        </div>
     </div>
 </div>
 
+<div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+        <h2>환경 설정</h2>
+        
+        <div class="setting-group">
+            <h3>🔢 연습할 단 선택</h3>
+            <div class="checkbox-grid" id="dan-grid">
+                <button class="dan-btn active" data-dan="2">2단</button>
+                <button class="dan-btn active" data-dan="3">3단</button>
+                <button class="dan-btn active" data-dan="4">4단</button>
+                <button class="dan-btn active" data-dan="5">5단</button>
+                <button class="dan-btn active" data-dan="6">6단</button>
+                <button class="dan-btn active" data-dan="7">7단</button>
+                <button class="dan-btn active" data-dan="8">8단</button>
+                <button class="dan-btn active" data-dan="9">9단</button>
+            </div>
+            <button class="toggle-btn" style="margin-top:10px; width:100%" id="btn-all-dans">전체 선택/해제</button>
+        </div>
+        
+        <div class="setting-group">
+            <h3>🎮 게임 모드</h3>
+            <div class="mode-grid">
+                <button class="toggle-btn mode-btn active" data-mode="normal">A × B = ?</button>
+                <button class="toggle-btn mode-btn" data-mode="missingB">A × ? = C</button>
+                <button class="toggle-btn mode-btn" data-mode="missingA">? × B = C</button>
+                <button class="toggle-btn mode-btn" data-mode="mixed">⭐ 전체 혼합</button>
+            </div>
+        </div>
+        
+        <button class="close-modal-btn" id="btn-close-settings">적용하고 계속하기</button>
+    </div>
+</div>
+
+<input type="number" id="hidden-input" inputmode="none">
+
 <script>
-    const problemElement = document.getElementById('problem');
-    const answerInput = document.getElementById('answer');
-    const checkBtn = document.getElementById('checkBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const showAnswerBtn = document.getElementById('showAnswerBtn');
-    const feedbackElement = document.getElementById('feedback');
-    const problemsSolvedElement = document.getElementById('problemsSolved');
-    const correctAnswersElement = document.getElementById('correctAnswers');
-    const correctionScoreElement = document.getElementById('correctionScore');
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const danCheckboxes = document.querySelectorAll('.dan-checkbox');
+    // --- Audio System Context ---
+    let audioCtx = null;
+    let audioInitialized = false;
 
-    let num1, num2, correctAnswer;
-    let prevNum1 = null, prevNum2 = null;
-    let problemsPresentedCount = 0;
-    let firstTryCorrectCount = 0;
-    let correctionCount = 0;
-    let isRetry = false;
-
-    function getSelectedDans() {
-        const selected = [];
-        danCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                selected.push(checkbox.value);
-            }
-        });
-        return selected;
-    }
-
-    function setButtonState(checkEnabled, showAnswerEnabled, nextEnabled) {
-        checkBtn.disabled = !checkEnabled;
-        showAnswerBtn.disabled = !showAnswerEnabled;
-        nextBtn.disabled = !nextEnabled;
-        answerInput.disabled = !checkEnabled;
-        if (checkEnabled) answerInput.focus();
-    }
-
-    function updateScoreDisplay() {
-        problemsSolvedElement.textContent = `푼 문제: ${problemsPresentedCount}`;
-        correctAnswersElement.textContent = `정답 (첫 시도): ${firstTryCorrectCount}`;
-        correctionScoreElement.textContent = `오답 수정: ${correctionCount}번 👍`;
-    }
-
-    function startNewPracticeSession() {
-        problemsPresentedCount = 0;
-        firstTryCorrectCount = 0;
-        correctionCount = 0;
-        isRetry = false;
-        prevNum1 = null; prevNum2 = null;
-        updateScoreDisplay();
-        generateProblem();
-        if (getSelectedDans().length > 0) {
-            feedbackElement.textContent = `좋아요! 선택한 단으로 연습을 시작합니다!`;
+    function initAudio() {
+        if (!audioInitialized) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            audioInitialized = true;
         }
-        feedbackElement.className = '';
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playTone(freq, type, duration, vol=0.1) {
+        if(!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        
+        gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    const soundEffects = {
+        tap: () => playTone(800, 'sine', 0.05, 0.08),
+        del: () => playTone(400, 'sine', 0.05, 0.08),
+        correct: () => {
+            playTone(523.25, 'sine', 0.1, 0.1); 
+            setTimeout(() => playTone(659.25, 'sine', 0.1, 0.1), 100); 
+            setTimeout(() => playTone(783.99, 'sine', 0.2, 0.1), 200); 
+            setTimeout(() => playTone(1046.50, 'sine', 0.4, 0.1), 300);
+        },
+        incorrect: () => {
+            playTone(200, 'triangle', 0.15, 0.2);
+            setTimeout(() => playTone(150, 'triangle', 0.3, 0.2), 150);
+        }
+    };
+
+    // --- Particle System ---
+    function createConfetti() {
+        const colors = ['#FF6B6B', '#50E3C2', '#4A90E2', '#F5A623', '#F8E71C', '#8E2DE2'];
+        const container = document.getElementById('problem-area');
+        const box = document.getElementById('input-box');
+        const rect = box ? box.getBoundingClientRect() : { left: window.innerWidth/2, top: window.innerHeight/3 };
+        const containerRect = container.getBoundingClientRect();
+        
+        const centerX = rect.left - containerRect.left + (rect.width||80)/2;
+        const centerY = rect.top - containerRect.top + (rect.height||90)/2;
+
+        for (let i = 0; i < 25; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            p.style.left = centerX + 'px';
+            p.style.top = centerY + 'px';
+            
+            const size = Math.random() * 8 + 6;
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            
+            // Random shape: sometimes circle, sometimes square
+            if(Math.random() > 0.5) p.style.borderRadius = '0px';
+            
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * 80 + 30;
+            const tx = Math.cos(angle) * velocity;
+            const ty = Math.sin(angle) * velocity - 60; // Bias upward
+            
+            p.animate([
+                { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1 },
+                { transform: `translate(${tx}px, ${ty}px) scale(0) rotate(${Math.random()*360}deg)`, opacity: 0 }
+            ], {
+                duration: 800 + Math.random() * 400,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            });
+            
+            container.appendChild(p);
+            setTimeout(() => p.remove(), 1200);
+        }
+    }
+
+
+    // --- Game Logic ---
+    let state = {
+        dans: [2,3,4,5,6,7,8,9],
+        mode: 'normal', // normal | missingA | missingB | mixed
+        currentProblem: null,
+        inputValue: '',
+        score: { correct: 0, combo: 0 },
+        isAwaitingNext: false
+    };
+
+    const equationEl = document.getElementById('equation');
+    const feedbackEl = document.getElementById('feedback');
+    const scoreCorrectEl = document.getElementById('score-correct');
+    const scoreComboEl = document.getElementById('score-combo');
+    const statusTextEl = document.getElementById('current-mode-status');
+
+    function getRandomItem(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
     }
 
     function generateProblem() {
-        isRetry = false;
-        const availableDans = getSelectedDans();
+        state.isAwaitingNext = false;
+        state.inputValue = '';
+        equationEl.classList.remove('incorrect');
+        feedbackEl.className = 'feedback-msg';
+        
+        let a, b, answer, type;
+        
+        // Ensure at least one dan is selected
+        const availableDans = state.dans.length > 0 ? state.dans : [2,3,4,5,6,7,8,9];
+        a = getRandomItem(availableDans);
+        b = Math.floor(Math.random() * 9) + 1;
+        answer = a * b;
 
-        if (availableDans.length === 0) {
-            problemElement.textContent = `? x ? = ?`;
-            feedbackElement.textContent = '연습할 단을 1개 이상 선택해주세요!';
-            feedbackElement.className = 'incorrect';
-            setButtonState(false, false, false);
-            answerInput.value = '';
-            return;
-        }
-
-        let newNum1, newNum2;
-        do {
-            const randomDanIndex = Math.floor(Math.random() * availableDans.length);
-            newNum1 = parseInt(availableDans[randomDanIndex]);
-            newNum2 = Math.floor(Math.random() * 9) + 1;
-        } while (newNum1 === prevNum1 && newNum2 === prevNum2);
-
-        num1 = newNum1;
-        num2 = newNum2;
-        prevNum1 = num1;
-        prevNum2 = num2;
-        correctAnswer = num1 * num2;
-
-        problemElement.textContent = `${num1} x ${num2} = ?`;
-        if (problemsPresentedCount > 0) {
-             feedbackElement.textContent = '다음 문제입니다! 정답을 입력하세요.';
-        } else if (feedbackElement.textContent.includes('연습을 시작합니다')) {
-            // 메시지 유지
+        if (state.mode === 'mixed') {
+            const types = ['normal', 'missingA', 'missingB'];
+            type = getRandomItem(types);
         } else {
-            feedbackElement.textContent = '정답을 입력하세요.';
+            type = state.mode;
         }
-        feedbackElement.className = '';
 
-        answerInput.value = '';
-        setButtonState(true, false, false);
+        state.currentProblem = { a, b, answer, type };
+        renderEquation();
+    }
+
+    function renderEquation() {
+        const { a, b, answer, type } = state.currentProblem;
+        const val = state.inputValue === '' ? '?' : state.inputValue;
+        const displayVal = state.inputValue === '' ? '<span class="empty">?</span>' : state.inputValue;
+
+        const boxHTML = `<div class="unknown-box active" id="input-box">${displayVal}</div>`;
+        
+        equationEl.innerHTML = '';
+        
+        if (type === 'normal') {
+            equationEl.innerHTML = `
+                <span class="num">${a}</span> <span>×</span> <span class="num">${b}</span> <span>=</span> ${boxHTML}
+            `;
+        } else if (type === 'missingA') {
+             equationEl.innerHTML = `
+                ${boxHTML} <span>×</span> <span class="num">${b}</span> <span>=</span> <span class="num">${answer}</span>
+            `;
+        } else if (type === 'missingB') {
+            equationEl.innerHTML = `
+                <span class="num">${a}</span> <span>×</span> ${boxHTML} <span>=</span> <span class="num">${answer}</span>
+            `;
+        }
+    }
+
+    function updateDisplayValue() {
+        const box = document.getElementById('input-box');
+        if(!box) return;
+        if(state.inputValue === '') {
+            box.innerHTML = '<span class="empty">?</span>';
+        } else {
+            box.innerHTML = state.inputValue;
+        }
+    }
+
+    function onNumberInput(numStr) {
+        initAudio();
+        if (state.isAwaitingNext) return;
+        
+        // Prevent overly long inputs (max 3 digits)
+        if (state.inputValue.length < 3) {
+            state.inputValue += numStr;
+            soundEffects.tap();
+            updateDisplayValue();
+        }
+    }
+
+    function onDeleteInput() {
+        initAudio();
+        if (state.isAwaitingNext) return;
+        
+        if (state.inputValue.length > 0) {
+            state.inputValue = state.inputValue.slice(0, -1);
+            soundEffects.del();
+            updateDisplayValue();
+        }
+    }
+
+    function animateScore(el) {
+        el.classList.remove('pop');
+        void el.offsetWidth; // trigger reflow
+        el.classList.add('pop');
+        setTimeout(() => el.classList.remove('pop'), 200);
     }
 
     function checkAnswer() {
-        const userAnswer = parseInt(answerInput.value);
-        if (isNaN(userAnswer)) {
-            feedbackElement.textContent = '숫자를 입력해주세요!';
-            feedbackElement.className = 'incorrect';
-            answerInput.value = '';
-            answerInput.focus();
-            return;
-        }
+        initAudio();
+        if (state.isAwaitingNext || state.inputValue === '') return;
 
-        if (!isRetry) {
-            problemsPresentedCount++;
-            updateScoreDisplay();
-        }
+        const { a, b, answer, type } = state.currentProblem;
+        let expected;
+        if (type === 'normal') expected = answer;
+        if (type === 'missingA') expected = a;
+        if (type === 'missingB') expected = b;
 
-        if (userAnswer === correctAnswer) {
-            if (!isRetry) {
-                feedbackElement.textContent = '정답! 👍';
-                feedbackElement.className = 'correct';
-                firstTryCorrectCount++;
-            } else {
-                feedbackElement.textContent = '오답을 수정했어요! 잘했어요! 😊';
-                feedbackElement.className = 'corrected';
-                correctionCount++;
-            }
-            updateScoreDisplay();
-            setButtonState(false, false, true);
+        const inputNum = parseInt(state.inputValue);
+        const box = document.getElementById('input-box');
+
+        if (inputNum === expected) {
+            // Correct
+            soundEffects.correct();
+            createConfetti();
+            
+            box.classList.remove('active');
+            box.classList.add('correct');
+            
+            feedbackEl.textContent = '참 잘했어요! ✨';
+            feedbackEl.className = 'feedback-msg show correct';
+            
+            state.score.correct++;
+            state.score.combo++;
+            
+            scoreCorrectEl.textContent = state.score.correct;
+            scoreComboEl.textContent = state.score.combo;
+            animateScore(scoreCorrectEl);
+            if(state.score.combo > 1) animateScore(scoreComboEl);
+
+            state.isAwaitingNext = true;
+            setTimeout(generateProblem, 1200);
         } else {
-            feedbackElement.textContent = `오답! 다시 시도하거나 정답을 확인하세요. 🤔`;
-            feedbackElement.className = 'incorrect';
-            isRetry = true;
-            answerInput.value = '';
-            setButtonState(true, true, false);
+            // Incorrect
+            soundEffects.incorrect();
+            equationEl.classList.remove('incorrect');
+            void equationEl.offsetWidth; 
+            equationEl.classList.add('incorrect');
+            
+            feedbackEl.textContent = '다시 한 번 생각해볼까요? 🤔';
+            feedbackEl.className = 'feedback-msg show incorrect';
+            
+            state.score.combo = 0;
+            scoreComboEl.textContent = state.score.combo;
+            scoreComboEl.classList.add('shake');
+            setTimeout(() => scoreComboEl.classList.remove('shake'), 400);
+
+            // Clear input for retry
+            state.inputValue = '';
+            setTimeout(() => {
+                updateDisplayValue();
+                equationEl.classList.remove('incorrect');
+            }, 600);
         }
     }
 
-    function showAnswer() {
-        feedbackElement.textContent = `정답은 ${correctAnswer} 입니다. 다음 문제로 넘어갑니다.`;
-        feedbackElement.className = 'incorrect';
-        isRetry = false;
-        setButtonState(false, false, true);
-    }
-
-    checkBtn.addEventListener('click', checkAnswer);
-    nextBtn.addEventListener('click', generateProblem);
-    showAnswerBtn.addEventListener('click', showAnswer);
-
-    selectAllCheckbox.addEventListener('change', () => {
-        danCheckboxes.forEach(checkbox => {
-            checkbox.checked = selectAllCheckbox.checked;
-        });
-        startNewPracticeSession();
+    // --- Keypad Bindings ---
+    document.querySelectorAll('.num-key').forEach(btn => {
+        btn.addEventListener('click', () => onNumberInput(btn.getAttribute('data-val')));
     });
 
-    danCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const allChecked = Array.from(danCheckboxes).every(cb => cb.checked);
-            selectAllCheckbox.checked = allChecked;
-            startNewPracticeSession();
-        });
-    });
+    document.querySelector('.del-key').addEventListener('click', onDeleteInput);
+    document.querySelector('.enter-key').addEventListener('click', checkAnswer);
 
-    // --- 여기부터가 변경된 부분입니다 ---
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            // '확인' 버튼이 활성화 상태이고, 사용자가 입력창에 있을 때
-            if (!checkBtn.disabled && document.activeElement === answerInput) {
-                event.preventDefault(); // 입력창에서의 기본 동작(예: 폼 제출) 방지
-                checkBtn.click();
-            }
-            // '다음 문제' 버튼이 활성화 상태일 때 (포커스와 무관하게 작동)
-            else if (!nextBtn.disabled) {
-                event.preventDefault();
-                nextBtn.click();
-            }
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+        if(e.key >= '0' && e.key <= '9') {
+            onNumberInput(e.key);
+        } else if (e.key === 'Backspace') {
+            onDeleteInput();
+        } else if (e.key === 'Enter') {
+            checkAnswer();
         }
     });
-    // --- 변경된 부분 끝 ---
 
-    // 초기 실행
-    updateScoreDisplay();
+    // --- Settings Modal Logic ---
+    const modalOverlay = document.getElementById('settings-modal');
+    const danBtns = document.querySelectorAll('.dan-btn');
+    const modeBtns = document.querySelectorAll('.mode-btn');
+    const btnAllDans = document.getElementById('btn-all-dans');
+
+    document.getElementById('btn-settings').addEventListener('click', () => {
+        initAudio();
+        // pre-fill visual states
+        danBtns.forEach(btn => {
+            const dan = parseInt(btn.getAttribute('data-dan'));
+            if(state.dans.includes(dan)) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        modeBtns.forEach(btn => {
+            if(btn.getAttribute('data-mode') === state.mode) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        modalOverlay.classList.add('active');
+    });
+
+    danBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            initAudio();
+            btn.classList.toggle('active');
+            soundEffects.tap();
+        });
+    });
+
+    modeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            initAudio();
+            modeBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            soundEffects.tap();
+        });
+    });
+
+    btnAllDans.addEventListener('click', () => {
+        initAudio();
+        const allActive = Array.from(danBtns).every(b => b.classList.contains('active'));
+        danBtns.forEach(b => {
+            if (allActive) b.classList.remove('active');
+            else b.classList.add('active');
+        });
+        soundEffects.tap();
+    });
+
+    function updateStatusText() {
+        let danText = state.dans.length === 8 ? "전체 단" : (state.dans.length === 0 ? "선택없음" : state.dans.join(', ')+"단");
+        let modeText = "기본 문제";
+        if(state.mode === 'missingA') modeText = "? × B = C";
+        if(state.mode === 'missingB') modeText = "A × ? = C";
+        if(state.mode === 'mixed') modeText = "혼합 모드";
+        
+        statusTextEl.textContent = `${danText} · ${modeText}`;
+    }
+
+    document.getElementById('btn-close-settings').addEventListener('click', () => {
+        initAudio();
+        // Apply settings
+        state.dans = [];
+        danBtns.forEach(btn => {
+            if(btn.classList.contains('active')) state.dans.push(parseInt(btn.getAttribute('data-dan')));
+        });
+        
+        modeBtns.forEach(btn => {
+            if(btn.classList.contains('active')) state.mode = btn.getAttribute('data-mode');
+        });
+
+        // if user deselected all, fallback to 2
+        if (state.dans.length === 0) {
+            state.dans = [2];
+            document.querySelector('.dan-btn[data-dan="2"]').classList.add('active');
+        }
+
+        updateStatusText();
+        
+        modalOverlay.classList.remove('active');
+        soundEffects.tap();
+        
+        // Generate new problem with new settings
+        state.score = { correct: 0, combo: 0 };
+        scoreCorrectEl.textContent = '0';
+        scoreComboEl.textContent = '0';
+        generateProblem();
+    });
+
+    // Start game on load
+    updateStatusText();
     generateProblem();
 
 </script>
-
 </body>
 </html>

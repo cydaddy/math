@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>말랑말랑 나눗셈 구슬 굴리기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Jua', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(120deg, #ff9a9e 0%, #fecfef 20%, #a1c4fd 60%, #c2e9fb 100%);
+            background-size: 300% 300%;
+            animation: aurora 15s ease infinite;
+        }
+
+        @keyframes aurora {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .clay {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            box-shadow:
+                12px 12px 24px rgba(0, 0, 0, 0.1),
+                -12px -12px 24px rgba(255, 255, 255, 0.6),
+                inset 6px 6px 12px rgba(255, 255, 255, 0.7),
+                inset -6px -6px 12px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        #game-container {
+            display: flex;
+            width: 98vw;
+            height: 95vh;
+            gap: 20px;
+        }
+
+        .player-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .player-panel.p1 {
+            background: rgba(255, 182, 193, 0.3);
+        }
+
+        .player-panel.p2 {
+            background: rgba(173, 216, 230, 0.3);
+        }
+
+        .player-panel.inactive {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.5);
+        }
+
+        .score-box {
+            font-size: 28px;
+            color: #444;
+            margin-bottom: 10px;
+            padding: 10px 30px;
+            border-radius: 30px;
+        }
+
+        .physics-area {
+            flex: 1;
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.1), inset -4px -4px 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .physics-instruction {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: #666;
+            font-size: 16px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .target-number {
+            font-size: 50px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .action-btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            font-family: 'Jua', sans-serif;
+            color: #555;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            margin-top: 10px;
+        }
+
+        .action-btn:active {
+            box-shadow:
+                inset 6px 6px 12px rgba(0, 0, 0, 0.1),
+                inset -6px -6px 12px rgba(255, 255, 255, 0.7);
+            transform: scale(0.95);
+        }
+
+        /* 중앙 보드 컨테이너 */
+        .board-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 빠르게 모드 전용 UI들 (보드판 위에 배치) */
+        .fast-mode-area {
+            height: 60px;
+            /* 공간 확보 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+
+        #fast-mode-btn {
+            display: none;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            color: #d81b60;
+            font-weight: bold;
+            font-size: 24px;
+            animation: pulse 1.5s infinite;
+            padding: 12px 40px;
+            border-radius: 30px;
+            margin: 0;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        #fast-mode-indicator {
+            display: none;
+            color: #d81b60;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 1 / 1;
+        }
+
+        .board-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            color: #444;
+            cursor: pointer;
+            border-radius: 15px;
+        }
+
+        .board-cell:active {
+            transform: scale(0.9);
+        }
+
+        .board-cell.p1-claimed {
+            background: rgba(255, 105, 180, 0.8);
+            color: white;
+            pointer-events: none;
+        }
+
+        .board-cell.p2-claimed {
+            background: rgba(100, 149, 237, 0.8);
+            color: white;
+            pointer-events: none;
+        }
+
+        .shake {
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            50% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-5px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #game-over h1 {
+            font-size: 60px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container">
+        <div id="p1-panel" class="player-panel p1 clay">
+            <div class="score-box clay">1P 점수: <span id="p1-score">0</span></div>
+            <div class="physics-area" id="p1-physics">
+                <div class="physics-instruction">여기를 터치해 구슬을 떨어뜨리세요!</div>
+            </div>
+            <div class="target-number" id="p1-target">?</div>
+            <button class="action-btn clay" id="p1-pass" onclick="passTurn(1)">찾는 수식이 없어요 (패스)</button>
+        </div>
+
+        <div class="board-container clay">
+            <!-- 보드 최상단 영역: 빠르게 버튼 위치 -->
+            <div class="fast-mode-area">
+                <button id="fast-mode-btn" class="action-btn clay" onclick="activateFastMode()">⚡ 빠르게! ⚡</button>
+                <div id="fast-mode-indicator">🔥 빠르게! 모드 🔥</div>
+            </div>
+
+            <h2 style="margin: 0 0 15px 0; color: #555;">나눗셈 보드</h2>
+            <div class="board-grid" id="board"></div>
+        </div>
+
+        <div id="p2-panel" class="player-panel p2 clay inactive">
+            <div class="score-box clay">2P 점수: <span id="p2-score">0</span></div>
+            <div class="physics-area" id="p2-physics">
+                <div class="physics-instruction">여기를 터치해 구슬을 떨어뜨리세요!</div>
+            </div>
+            <div class="target-number" id="p2-target">?</div>
+            <button class="action-btn clay" id="p2-pass" onclick="passTurn(2)">찾는 수식이 없어요 (패스)</button>
+        </div>
+    </div>
+
+    <div id="game-over">
+        <h1 id="winner-text">게임 종료!</h1>
+        <button class="action-btn clay" onclick="location.reload()">다시 하기</button>
+    </div>
+
+    <script>
+        let currentPlayer = 1;
+        let scores = { 1: 0, 2: 0 };
+        let currentTarget = { 1: null, 2: null };
+        let gameState = 'ROLLING';
+        const boardSize = 25;
+        let claimedCount = 0;
+
+        let isFastModeActive = false;
+        let fastModeBins = [];
+
+        function generateProblems() {
+            const pool = [];
+            for (let q = 1; q <= 9; q++) {
+                for (let divisor = 1; divisor <= 9; divisor++) {
+                    const dividend = q * divisor;
+                    pool.push({ text: `${dividend} ÷ ${divisor}`, answer: q });
+                }
+            }
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool.slice(0, boardSize);
+        }
+
+        const boardProblems = generateProblems();
+        const boardEl = document.getElementById('board');
+
+        boardProblems.forEach((prob) => {
+            const cell = document.createElement('div');
+            cell.className = 'board-cell clay';
+            cell.innerText = prob.text;
+            cell.dataset.answer = prob.answer;
+            cell.onclick = () => handleCellClick(cell, prob.answer);
+            boardEl.appendChild(cell);
+        });
+
+        function getRemainingQuotients() {
+            const cells = document.querySelectorAll('.board-cell:not(.p1-claimed):not(.p2-claimed)');
+            const qs = new Set();
+            cells.forEach(c => qs.add(parseInt(c.dataset.answer)));
+            return Array.from(qs).sort((a, b) => a - b);
+        }
+
+        function updateGameState() {
+            const remaining = getRemainingQuotients();
+            if (remaining.length === 0) return;
+
+            if (!isFastModeActive) {
+                if (remaining.length <= 3) {
+                    document.getElementById('fast-mode-btn').style.display = 'block';
+                }
+            } else {
+                refreshFastModeBins(remaining);
+            }
+        }
+
+        function activateFastMode() {
+            isFastModeActive = true;
+            document.getElementById('fast-mode-btn').style.display = 'none';
+            document.getElementById('fast-mode-indicator').style.display = 'block';
+
+            const remaining = getRemainingQuotients();
+            refreshFastModeBins(remaining);
+        }
+
+        function refreshFastModeBins(remaining) {
+            fastModeBins = [];
+            if (remaining.length === 1) {
+                fastModeBins = ['꽝', '꽝', '꽝', '꽝', '꽝', remaining[0], remaining[0], remaining[0], remaining[0]];
+                for (let i = fastModeBins.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [fastModeBins[i], fastModeBins[j]] = [fastModeBins[j], fastModeBins[i]];
+                }
+            } else if (remaining.length > 1) {
+                for (let i = 0; i < 9; i++) {
+                    fastModeBins.push(remaining[i % remaining.length]);
+                }
+            }
+        }
+
+        function handleCellClick(cell, answer) {
+            if (gameState !== 'PLAYING') return;
+            if (cell.classList.contains('p1-claimed') || cell.classList.contains('p2-claimed')) return;
+
+            const target = currentTarget[currentPlayer];
+            if (target === null || target === '꽝') return;
+
+            if (answer === target) {
+                cell.classList.add(`p${currentPlayer}-claimed`);
+                scores[currentPlayer]++;
+                document.getElementById(`p${currentPlayer}-score`).innerText = scores[currentPlayer];
+                claimedCount++;
+
+                updateGameState();
+                checkGameOver();
+
+                if (claimedCount < boardSize) {
+                    switchTurn();
+                }
+            } else {
+                cell.classList.remove('shake');
+                void cell.offsetWidth;
+                cell.classList.add('shake');
+            }
+        }
+
+        function passTurn(player) {
+            if (currentPlayer !== player || gameState !== 'PLAYING') return;
+            switchTurn();
+        }
+
+        function switchTurn() {
+            currentTarget[currentPlayer] = null;
+            document.getElementById(`p${currentPlayer}-target`).innerText = '?';
+            document.getElementById(`p${currentPlayer}-panel`).classList.add('inactive');
+
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            gameState = 'ROLLING';
+
+            document.getElementById(`p${currentPlayer}-panel`).classList.remove('inactive');
+            document.getElementById(`p${currentPlayer}-pass`).style.display = 'none';
+
+            resetPhysics(currentPlayer);
+        }
+
+        function checkGameOver() {
+            if (claimedCount >= boardSize) {
+                const gameOverEl = document.getElementById('game-over');
+                const winnerText = document.getElementById('winner-text');
+                gameOverEl.style.display = 'flex';
+                if (scores[1] > scores[2]) winnerText.innerText = '1P 승리! 🎉';
+                else if (scores[2] > scores[1]) winnerText.innerText = '2P 승리! 🎉';
+                else winnerText.innerText = '무승부! 🤝';
+            }
+        }
+
+        // --- Matter.js 물리 엔진 ---
+        const Engine = Matter.Engine,
+            Render = Matter.Render,
+            Runner = Matter.Runner,
+            Bodies = Matter.Bodies,
+            Composite = Matter.Composite,
+            Events = Matter.Events;
+
+        let engines = { 1: null, 2: null };
+        let renderers = { 1: null, 2: null };
+        let balls = { 1: null, 2: null };
+
+        function initPhysics(playerNum) {
+            const container = document.getElementById(`p${playerNum}-physics`);
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const engine = Engine.create();
+            engines[playerNum] = engine;
+            engine.world.gravity.y = 1.0;
+
+            const render = Render.create({
+                element: container,
+                engine: engine,
+                options: {
+                    width: width,
+                    height: height,
+                    wireframes: false,
+                    background: 'transparent'
+                }
+            });
+            renderers[playerNum] = render;
+
+            const walls = [
+                Bodies.rectangle(width / 2, height + 25, width, 50, { isStatic: true, render: { visible: false } }),
+                Bodies.rectangle(-25, height / 2, 50, height, { isStatic: true, friction: 0, render: { visible: false } }),
+                Bodies.rectangle(width + 25, height / 2, 50, height, { isStatic: true, friction: 0, render: { visible: false } })
+            ];
+
+            const pegs = [];
+            const cols = 8;
+            const spacingX = width / cols;
+            const rowHeight = 45;
+            const rows = Math.floor((height - 120) / rowHeight);
+
+            for (let i = 0; i < rows; i++) {
+                let offset = (i % 2 === 0) ? 0 : spacingX / 2;
+                for (let j = -1; j <= cols + 1; j++) {
+                    let x = j * spacingX + offset;
+                    let y = 60 + i * rowHeight;
+                    if (x >= -10 && x <= width + 10) {
+                        pegs.push(Bodies.circle(x, y, 5, {
+                            isStatic: true,
+                            restitution: 0.6,
+                            friction: 0.001,
+                            render: { fillStyle: 'rgba(255,255,255,0.9)' }
+                        }));
+                    }
+                }
+            }
+
+            const bins = [];
+            const binWidth = width / 9;
+            for (let i = 1; i < 9; i++) {
+                bins.push(Bodies.rectangle(i * binWidth, height - 25, 4, 50, {
+                    isStatic: true,
+                    friction: 0,
+                    render: { fillStyle: 'rgba(255,255,255,0.5)' }
+                }));
+            }
+
+            Events.on(render, 'afterRender', function () {
+                const ctx = render.context;
+                ctx.font = "bold 18px Jua";
+                ctx.textAlign = "center";
+                for (let i = 0; i < 9; i++) {
+                    let textToShow = isFastModeActive ? fastModeBins[i] : (i + 1);
+                    ctx.fillStyle = (textToShow === '꽝') ? '#ff4757' : '#555';
+                    ctx.fillText(textToShow, i * binWidth + binWidth / 2, height - 15);
+                }
+            });
+
+            Composite.add(engine.world, [...walls, ...pegs, ...bins]);
+
+            Render.run(render);
+            const runner = Runner.create();
+            Runner.run(runner, engine);
+
+            container.addEventListener('mousedown', (e) => dropBall(playerNum, e, width));
+            container.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                dropBall(playerNum, e.touches[0], width);
+            });
+        }
+
+        function dropBall(playerNum, event, width) {
+            if (currentPlayer !== playerNum || gameState !== 'ROLLING' || balls[playerNum] !== null) return;
+
+            const container = document.getElementById(`p${playerNum}-physics`);
+            const rect = container.getBoundingClientRect();
+            let dropX = event.clientX - rect.left;
+
+            dropX = Math.max(15, Math.min(width - 15, dropX));
+
+            const ballColor = playerNum === 1 ? '#ff69b4' : '#6495ed';
+
+            const ball = Bodies.circle(dropX, 10, 11, {
+                restitution: 0.6,
+                friction: 0.001,
+                density: 0.05,
+                render: { fillStyle: ballColor }
+            });
+
+            balls[playerNum] = ball;
+            Composite.add(engines[playerNum].world, ball);
+
+            let checkInterval = setInterval(() => {
+                if (ball.position.y > container.clientHeight - 40 && ball.speed < 0.5) {
+                    clearInterval(checkInterval);
+                    determineNumber(playerNum, ball.position.x, width);
+                }
+            }, 300);
+        }
+
+        function determineNumber(playerNum, ballX, width) {
+            const binWidth = width / 9;
+            let binIndex = Math.floor(ballX / binWidth);
+            if (binIndex < 0) binIndex = 0;
+            if (binIndex > 8) binIndex = 8;
+
+            let targetValue = isFastModeActive ? fastModeBins[binIndex] : (binIndex + 1);
+
+            currentTarget[playerNum] = targetValue;
+            document.getElementById(`p${playerNum}-target`).innerText = targetValue;
+
+            document.getElementById(`p${playerNum}-pass`).style.display = 'block';
+
+            gameState = 'PLAYING';
+        }
+
+        function resetPhysics(playerNum) {
+            if (balls[playerNum]) {
+                Composite.remove(engines[playerNum].world, balls[playerNum]);
+                balls[playerNum] = null;
+            }
+        }
+
+        window.onload = () => {
+            document.getElementById('p1-pass').style.display = 'none';
+            document.getElementById('p2-pass').style.display = 'none';
+
+            setTimeout(() => {
+                initPhysics(1);
+                initPhysics(2);
+            }, 100);
+        };
+
+    </script>
+</body>
+
+</html>

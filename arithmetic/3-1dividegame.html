@@ -506,6 +506,11 @@
             const spacingX = width / cols;
             const rowHeight = 45;
             const rows = Math.floor((height - 120) / rowHeight);
+            const pegRadius = 5;
+            const ballRadius = 11;
+            // 벽 가장자리 가이드 핀 위치: 벽(x=0) 안쪽으로 pegRadius만큼 떨어진 곳
+            // 이렇게 하면 핀이 벽 밖으로 돌출되어 공을 확실히 튕겨냄
+            const guardX = pegRadius;
 
             for (let i = 0; i < rows; i++) {
                 let offset = (i % 2 === 0) ? 0 : spacingX / 2;
@@ -513,7 +518,7 @@
                     let x = j * spacingX + offset;
                     let y = 60 + i * rowHeight;
                     if (x >= -10 && x <= width + 10) {
-                        pegs.push(Bodies.circle(x, y, 5, {
+                        pegs.push(Bodies.circle(x, y, pegRadius, {
                             isStatic: true,
                             restitution: 0.6,
                             friction: 0.001,
@@ -521,11 +526,19 @@
                         }));
                     }
                 }
-                // 홀수 줄 가장자리에 보이지 않는 핀을 추가하여 공이 벽에 끼는 현상 방지 (간격 유지)
-                if (i % 2 !== 0) {
-                    let y = 60 + i * rowHeight;
-                    pegs.push(Bodies.circle(0, y, 5, { isStatic: true, friction: 0, restitution: 0.6, render: { visible: false } }));
-                    pegs.push(Bodies.circle(width, y, 5, { isStatic: true, friction: 0, restitution: 0.6, render: { visible: false } }));
+            }
+
+            // 벽 가장자리 가이드 핀: 모든 행 + 행 사이에도 배치하여 공이 절대 벽을 타고 내려오지 못하게 함
+            for (let i = 0; i < rows; i++) {
+                let y = 60 + i * rowHeight;
+                // 각 행 위치에 가이드 핀
+                pegs.push(Bodies.circle(guardX, y, pegRadius, { isStatic: true, friction: 0, restitution: 0.8, render: { visible: false } }));
+                pegs.push(Bodies.circle(width - guardX, y, pegRadius, { isStatic: true, friction: 0, restitution: 0.8, render: { visible: false } }));
+                // 행 사이 중간 지점에도 가이드 핀 (공이 행 사이로 빠지는 것 방지)
+                if (i < rows - 1) {
+                    let midY = y + rowHeight / 2;
+                    pegs.push(Bodies.circle(guardX, midY, pegRadius, { isStatic: true, friction: 0, restitution: 0.8, render: { visible: false } }));
+                    pegs.push(Bodies.circle(width - guardX, midY, pegRadius, { isStatic: true, friction: 0, restitution: 0.8, render: { visible: false } }));
                 }
             }
 

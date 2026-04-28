@@ -159,11 +159,11 @@
         /* 빠르게 모드 전용 UI들 (보드판 위에 배치) */
         .fast-mode-area {
             height: 60px;
-            /* 공간 확보 */
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 5px;
+            width: 100%;
         }
 
         #fast-mode-btn {
@@ -173,9 +173,11 @@
             font-weight: bold;
             font-size: 24px;
             animation: pulse 1.5s infinite;
-            padding: 12px 40px;
+            padding: 12px 30px;
             border-radius: 30px;
             margin: 0;
+            white-space: nowrap;
+            max-width: 90%;
         }
 
         @keyframes pulse {
@@ -509,16 +511,6 @@
                 let offset = (i % 2 === 0) ? 0 : spacingX / 2;
                 for (let j = -1; j <= cols + 1; j++) {
                     let x = j * spacingX + offset;
-                    
-                    // 가장자리에 있는 장애물에서 벽까지의 거리가 공의 반지름(11)보다 항상 작게 유지
-                    if (i % 2 !== 0) {
-                        if (j === 0 && x >= 11) {
-                            x = 10.9;
-                        } else if (j === cols - 1 && (width - x) >= 11) {
-                            x = width - 10.9;
-                        }
-                    }
-
                     let y = 60 + i * rowHeight;
                     if (x >= -10 && x <= width + 10) {
                         pegs.push(Bodies.circle(x, y, 5, {
@@ -528,6 +520,12 @@
                             render: { fillStyle: 'rgba(255,255,255,0.9)' }
                         }));
                     }
+                }
+                // 홀수 줄 가장자리에 보이지 않는 핀을 추가하여 공이 벽에 끼는 현상 방지 (간격 유지)
+                if (i % 2 !== 0) {
+                    let y = 60 + i * rowHeight;
+                    pegs.push(Bodies.circle(0, y, 5, { isStatic: true, friction: 0, restitution: 0.6, render: { visible: false } }));
+                    pegs.push(Bodies.circle(width, y, 5, { isStatic: true, friction: 0, restitution: 0.6, render: { visible: false } }));
                 }
             }
 
